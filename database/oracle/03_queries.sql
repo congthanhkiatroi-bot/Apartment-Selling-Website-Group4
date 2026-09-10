@@ -1,280 +1,634 @@
--- =====================================================
--- APARTMENT WEB - BACKEND QUERIES (REVISED)
--- 03_queries.sql
--- =====================================================
+-- ============================================================
+-- 03_QUERIES.SQL
+-- QUERIES FOR APARTMENT SELLING WEBSITE
+-- ============================================================
 
 
--- =====================================================
--- 1. LOGIN
--- Chi lay USER theo USERNAME, KHONG so sanh password trong SQL.
--- Tang ung dung (Java) se dung BCryptPasswordEncoder.matches(
---   rawPassword, user.getPasswordHash()) de xac thuc.
--- =====================================================
+-- ============================================================
+-- 1. XEM TẤT CẢ TÒA NHÀ
+-- ============================================================
 
 SELECT
-    USER_ID,
-    USERNAME,
-    EMAIL,
-    PASSWORD_HASH,
-    ROLE,
-    CREATED_AT,
-    IS_ACTIVE
-FROM USERS
-WHERE USERNAME = :username
-  AND IS_ACTIVE = 1;
+    BUILDING_ID,
+    BUILDING_CODE,
+    BUILDING_NAME,
+    ADDRESS,
+    WARD,
+    DISTRICT,
+    CITY,
+    TOTAL_FLOORS,
+    TOTAL_APARTMENTS,
+    YEAR_BUILT,
+    STATUS
+FROM BUILDINGS
+ORDER BY BUILDING_NAME;
 
 
--- =====================================================
--- 2. GET USER BY ID
--- =====================================================
-
-SELECT
-    USER_ID, USERNAME, EMAIL, ROLE, CREATED_AT, IS_ACTIVE
-FROM USERS
-WHERE USER_ID = :user_id;
-
-
--- =====================================================
--- 3. SEARCH PROPERTY
--- =====================================================
+-- ============================================================
+-- 2. XEM TÒA NHÀ + SỐ LƯỢNG CĂN HỘ
+-- ============================================================
 
 SELECT
-    PROPERTY_ID, TITLE, PRICE, AREA, STATUS, DESCRIPTION, ADDRESS, CREATED_AT
-FROM PROPERTIES
-WHERE LOWER(TITLE) LIKE LOWER(:keyword)
-  AND PRICE BETWEEN :min_price AND :max_price
-  AND AREA BETWEEN :min_area AND :max_area
-  AND STATUS = 'AVAILABLE'
-ORDER BY PROPERTY_ID DESC;
+    b.BUILDING_ID,
+    b.BUILDING_CODE,
+    b.BUILDING_NAME,
+    b.DISTRICT,
+    b.CITY,
+    COUNT(a.APARTMENT_ID) AS APARTMENT_COUNT
+FROM BUILDINGS b
+         LEFT JOIN APARTMENTS a
+                   ON b.BUILDING_ID = a.BUILDING_ID
+GROUP BY
+    b.BUILDING_ID,
+    b.BUILDING_CODE,
+    b.BUILDING_NAME,
+    b.DISTRICT,
+    b.CITY
+ORDER BY b.BUILDING_NAME;
 
 
--- =====================================================
--- 4. GET ALL AVAILABLE PROPERTIES (kem thumbnail)
--- =====================================================
+-- ============================================================
+-- 3. XEM DANH SÁCH CĂN HỘ
+-- ============================================================
 
 SELECT
-    p.PROPERTY_ID, p.TITLE, p.PRICE, p.AREA, p.STATUS, p.DESCRIPTION, p.ADDRESS,
-    img.IMAGE_URL AS THUMBNAIL_URL
+    a.APARTMENT_ID,
+    b.BUILDING_NAME,
+    a.APARTMENT_CODE,
+    a.FLOOR_NUMBER,
+    a.ROOM_NUMBER,
+    a.AREA,
+    a.BEDROOMS,
+    a.BATHROOMS,
+    a.BALCONY_AREA,
+    a.DIRECTION,
+    a.VIEW_TYPE,
+    a.LEGAL_STATUS,
+    a.STATUS
+FROM APARTMENTS a
+         JOIN BUILDINGS b
+              ON a.BUILDING_ID = b.BUILDING_ID
+ORDER BY
+    b.BUILDING_NAME,
+    a.FLOOR_NUMBER,
+    a.APARTMENT_CODE;
+
+
+-- ============================================================
+-- 4. DANH SÁCH CĂN HỘ ĐANG BÁN
+-- ============================================================
+
+SELECT
+    p.PROPERTY_ID,
+    b.BUILDING_NAME,
+    a.APARTMENT_CODE,
+    a.FLOOR_NUMBER,
+    a.AREA,
+    a.BEDROOMS,
+    a.BATHROOMS,
+    p.TITLE,
+    p.PRICE,
+    p.PRICE_PER_M2,
+    p.STATUS
 FROM PROPERTIES p
-         LEFT JOIN PROPERTY_IMAGES img
-                   ON img.PROPERTY_ID = p.PROPERTY_ID AND img.IS_THUMBNAIL = 1
+         JOIN APARTMENTS a
+              ON p.APARTMENT_ID = a.APARTMENT_ID
+         JOIN BUILDINGS b
+              ON a.BUILDING_ID = b.BUILDING_ID
 WHERE p.STATUS = 'AVAILABLE'
-ORDER BY p.PROPERTY_ID DESC;
+ORDER BY p.PRICE;
 
 
--- =====================================================
--- 5. GET PROPERTY BY ID
--- =====================================================
-
-SELECT
-    PROPERTY_ID, TITLE, PRICE, AREA, STATUS, DESCRIPTION, ADDRESS, CREATED_AT
-FROM PROPERTIES
-WHERE PROPERTY_ID = :property_id;
-
-
--- =====================================================
--- 5b. GET IMAGES OF PROPERTY (moi)
--- =====================================================
+-- ============================================================
+-- 5. DANH SÁCH TIN ĐĂNG
+-- ============================================================
 
 SELECT
-    IMAGE_ID, IMAGE_URL, IS_THUMBNAIL, UPLOADED_AT
-FROM PROPERTY_IMAGES
-WHERE PROPERTY_ID = :property_id
-ORDER BY IS_THUMBNAIL DESC, IMAGE_ID ASC;
-
-
--- =====================================================
--- 6. GET APARTMENT DETAIL
--- =====================================================
-
-SELECT
-    p.PROPERTY_ID, p.TITLE, p.PRICE, p.AREA, p.STATUS, p.DESCRIPTION, p.ADDRESS,
-    a.FLOOR_NUMBER, a.ROOM_NUMBER, a.BEDROOMS, a.BATHROOMS
-FROM PROPERTIES p
-         LEFT JOIN APARTMENTS a ON a.PROPERTY_ID = p.PROPERTY_ID
-WHERE p.PROPERTY_ID = :property_id;
-
-
--- =====================================================
--- 7. GET BUILDING DETAIL
--- =====================================================
-
-SELECT
-    p.PROPERTY_ID, p.TITLE, p.PRICE, p.AREA, p.STATUS, p.DESCRIPTION, p.ADDRESS,
-    b.TOTAL_FLOORS
-FROM PROPERTIES p
-         LEFT JOIN BUILDINGS b ON b.PROPERTY_ID = p.PROPERTY_ID
-WHERE p.PROPERTY_ID = :property_id;
-
-
--- =====================================================
--- 8. INSERT PROPERTY
--- =====================================================
-
-INSERT INTO PROPERTIES (TITLE, PRICE, AREA, STATUS, DESCRIPTION, ADDRESS)
-VALUES (:title, :price, :area, :status, :description, :address);
-
-
--- =====================================================
--- 9. UPDATE PROPERTY
--- =====================================================
-
-UPDATE PROPERTIES
-SET TITLE = :title, PRICE = :price, AREA = :area, STATUS = :status,
-    DESCRIPTION = :description, ADDRESS = :address
-WHERE PROPERTY_ID = :property_id;
-
-
--- =====================================================
--- 10. DELETE PROPERTY
--- Doi tu xoa cung (physical DELETE) sang "soft delete":
--- vi PROPERTIES lien quan LISTINGS/REVIEWS/TRANSACTIONS (khong cascade,
--- co chu dich, xem comment trong 01_create_tables.sql), xoa cung se
--- bao loi FK neu da co du lieu lien quan, va cung lam mat lich su giao dich.
--- => An tin dang bang cach chuyen STATUS = 'HIDDEN'.
--- =====================================================
-
-UPDATE PROPERTIES
-SET STATUS = 'HIDDEN'
-WHERE PROPERTY_ID = :property_id;
-
--- Chi dung ban xoa that (hard delete) cho ADMIN, va chi khi property
--- CHUA CO listing/review/transaction nao (kiem tra truoc o tang ung dung):
--- DELETE FROM PROPERTIES WHERE PROPERTY_ID = :property_id;
-
-
--- =====================================================
--- 11. GET ACTIVE LISTINGS
--- =====================================================
-
-SELECT
-    l.LISTING_ID, l.OWNER_ID, l.PROPERTY_ID, l.POST_DATE, l.EXPIRY_DATE, l.STATUS,
-    p.TITLE, p.PRICE, p.AREA, p.ADDRESS
+    l.LISTING_ID,
+    l.LISTING_CODE,
+    l.LISTING_TITLE,
+    o.OWNER_ID,
+    u.USERNAME AS OWNER_USERNAME,
+    p.PROPERTY_ID,
+    p.TITLE,
+    l.ASKING_PRICE,
+    l.POST_DATE,
+    l.EXPIRY_DATE,
+    l.STATUS
 FROM LISTINGS l
-         JOIN PROPERTIES p ON p.PROPERTY_ID = l.PROPERTY_ID
-WHERE l.STATUS = 'ACTIVE'
+         JOIN OWNERS o
+              ON l.OWNER_ID = o.OWNER_ID
+         JOIN USERS u
+              ON o.OWNER_ID = u.USER_ID
+         JOIN PROPERTIES p
+              ON l.PROPERTY_ID = p.PROPERTY_ID
+ORDER BY l.POST_DATE DESC;
+
+
+-- ============================================================
+-- 6. CHI TIẾT CĂN HỘ
+-- ============================================================
+
+SELECT
+    p.PROPERTY_ID,
+    p.TITLE,
+
+    b.BUILDING_NAME,
+    b.ADDRESS,
+    b.WARD,
+    b.DISTRICT,
+    b.CITY,
+
+    a.APARTMENT_CODE,
+    a.FLOOR_NUMBER,
+    a.ROOM_NUMBER,
+    a.AREA,
+    a.BEDROOMS,
+    a.BATHROOMS,
+    a.BALCONY_AREA,
+    a.DIRECTION,
+    a.VIEW_TYPE,
+    a.LEGAL_STATUS,
+
+    p.PRICE,
+    p.PRICE_PER_M2,
+    p.DESCRIPTION,
+    p.STATUS
+
+FROM PROPERTIES p
+         JOIN APARTMENTS a
+              ON p.APARTMENT_ID = a.APARTMENT_ID
+         JOIN BUILDINGS b
+              ON a.BUILDING_ID = b.BUILDING_ID;
+
+
+-- ============================================================
+-- 7. TÌM CĂN HỘ THEO KHOẢNG GIÁ
+-- ============================================================
+
+SELECT
+    p.PROPERTY_ID,
+    p.TITLE,
+    a.AREA,
+    a.BEDROOMS,
+    p.PRICE,
+    b.BUILDING_NAME
+FROM PROPERTIES p
+         JOIN APARTMENTS a
+              ON p.APARTMENT_ID = a.APARTMENT_ID
+         JOIN BUILDINGS b
+              ON a.BUILDING_ID = b.BUILDING_ID
+WHERE p.PRICE BETWEEN 3000000000 AND 5000000000
   AND p.STATUS = 'AVAILABLE'
-ORDER BY l.POST_DATE DESC;
+ORDER BY p.PRICE;
 
 
--- =====================================================
--- 12. GET LISTINGS BY OWNER
--- =====================================================
-
-SELECT
-    l.LISTING_ID, l.PROPERTY_ID, p.TITLE, p.PRICE, p.AREA,
-    p.STATUS AS PROPERTY_STATUS, l.POST_DATE, l.EXPIRY_DATE, l.STATUS AS LISTING_STATUS
-FROM LISTINGS l
-         JOIN PROPERTIES p ON p.PROPERTY_ID = l.PROPERTY_ID
-WHERE l.OWNER_ID = :owner_id
-ORDER BY l.POST_DATE DESC;
-
-
--- =====================================================
--- 13. CREATE TRANSACTION
--- (Trigger TRG_TRANSACTION_COMPLETED se tu dong cap nhat LISTINGS/PROPERTIES
---  neu STATUS = 'COMPLETED')
--- =====================================================
-
-INSERT INTO TRANSACTIONS (CUSTOMER_ID, LISTING_ID, AMOUNT, TRANSACTION_DATE, STATUS)
-VALUES (:customer_id, :listing_id, :amount, SYSTIMESTAMP, 'PENDING');
-
-
--- =====================================================
--- 14. GET TRANSACTIONS BY CUSTOMER
--- =====================================================
+-- ============================================================
+-- 8. TÌM CĂN HỘ THEO DIỆN TÍCH
+-- ============================================================
 
 SELECT
-    t.TRANSACTION_ID, t.CUSTOMER_ID, t.LISTING_ID, t.AMOUNT, t.TRANSACTION_DATE, t.STATUS,
-    l.PROPERTY_ID, p.TITLE, p.PRICE
-FROM TRANSACTIONS t
-         JOIN LISTINGS l ON l.LISTING_ID = t.LISTING_ID
-         JOIN PROPERTIES p ON p.PROPERTY_ID = l.PROPERTY_ID
-WHERE t.CUSTOMER_ID = :customer_id
-ORDER BY t.TRANSACTION_DATE DESC;
+    p.PROPERTY_ID,
+    p.TITLE,
+    a.AREA,
+    a.BEDROOMS,
+    a.BATHROOMS,
+    p.PRICE
+FROM PROPERTIES p
+         JOIN APARTMENTS a
+              ON p.APARTMENT_ID = a.APARTMENT_ID
+WHERE a.AREA >= 70
+ORDER BY a.AREA DESC;
 
 
--- =====================================================
--- 15. UPDATE TRANSACTION STATUS
--- =====================================================
-
-UPDATE TRANSACTIONS
-SET STATUS = :status
-WHERE TRANSACTION_ID = :transaction_id;
-
-
--- =====================================================
--- 16. GET REVIEWS OF PROPERTY
--- =====================================================
+-- ============================================================
+-- 9. TÌM CĂN HỘ THEO SỐ PHÒNG NGỦ
+-- ============================================================
 
 SELECT
-    r.REVIEW_ID, r.CUSTOMER_ID, u.USERNAME, r.PROPERTY_ID, r.RATING, r.COMMENT_TEXT, r.REVIEW_DATE
-FROM REVIEWS r
-         JOIN USERS u ON u.USER_ID = r.CUSTOMER_ID
-WHERE r.PROPERTY_ID = :property_id
-ORDER BY r.REVIEW_DATE DESC;
+    p.PROPERTY_ID,
+    p.TITLE,
+    a.BEDROOMS,
+    a.BATHROOMS,
+    a.AREA,
+    p.PRICE
+FROM PROPERTIES p
+         JOIN APARTMENTS a
+              ON p.APARTMENT_ID = a.APARTMENT_ID
+WHERE a.BEDROOMS = 3
+  AND p.STATUS = 'AVAILABLE'
+ORDER BY p.PRICE;
 
 
--- =====================================================
--- 17. ADD REVIEW
--- =====================================================
-
-INSERT INTO REVIEWS (CUSTOMER_ID, PROPERTY_ID, RATING, COMMENT_TEXT)
-VALUES (:customer_id, :property_id, :rating, :comment_text);
-
-
--- =====================================================
--- 18. AVERAGE RATING
--- =====================================================
-
-SELECT
-    PROPERTY_ID, ROUND(AVG(RATING), 2) AS AVERAGE_RATING, COUNT(*) AS REVIEW_COUNT
-FROM REVIEWS
-WHERE PROPERTY_ID = :property_id
-GROUP BY PROPERTY_ID;
-
-
--- =====================================================
--- 19a. ADD FAVORITE (moi)
--- =====================================================
-
-INSERT INTO FAVORITES (CUSTOMER_ID, PROPERTY_ID)
-VALUES (:customer_id, :property_id);
-
-
--- =====================================================
--- 19b. REMOVE FAVORITE (moi)
--- =====================================================
-
-DELETE FROM FAVORITES
-WHERE CUSTOMER_ID = :customer_id AND PROPERTY_ID = :property_id;
-
-
--- =====================================================
--- 19c. GET FAVORITES BY CUSTOMER (moi)
--- =====================================================
+-- ============================================================
+-- 10. DANH SÁCH FAVORITES CỦA KHÁCH HÀNG
+-- ============================================================
 
 SELECT
-    f.PROPERTY_ID, p.TITLE, p.PRICE, p.AREA, p.STATUS, f.CREATED_AT
+    u.USERNAME,
+    p.PROPERTY_ID,
+    p.TITLE,
+    p.PRICE,
+    f.CREATED_AT
 FROM FAVORITES f
-         JOIN PROPERTIES p ON p.PROPERTY_ID = f.PROPERTY_ID
-WHERE f.CUSTOMER_ID = :customer_id
+         JOIN CUSTOMERS c
+              ON f.CUSTOMER_ID = c.CUSTOMER_ID
+         JOIN USERS u
+              ON c.CUSTOMER_ID = u.USER_ID
+         JOIN PROPERTIES p
+              ON f.PROPERTY_ID = p.PROPERTY_ID
 ORDER BY f.CREATED_AT DESC;
 
 
--- =====================================================
--- 20. CHECK DATABASE
--- =====================================================
+-- ============================================================
+-- 11. DANH SÁCH GIAO DỊCH
+-- ============================================================
 
-SELECT COUNT(*) AS USER_COUNT FROM USERS;
-SELECT COUNT(*) AS CUSTOMER_COUNT FROM CUSTOMERS;
-SELECT COUNT(*) AS CUSTOMER_LOCATION_COUNT FROM CUSTOMER_LOCATIONS;
-SELECT COUNT(*) AS OWNER_COUNT FROM OWNERS;
-SELECT COUNT(*) AS PROPERTY_COUNT FROM PROPERTIES;
-SELECT COUNT(*) AS PROPERTY_IMAGE_COUNT FROM PROPERTY_IMAGES;
-SELECT COUNT(*) AS APARTMENT_COUNT FROM APARTMENTS;
-SELECT COUNT(*) AS BUILDING_COUNT FROM BUILDINGS;
-SELECT COUNT(*) AS FAVORITE_COUNT FROM FAVORITES;
-SELECT COUNT(*) AS LISTING_COUNT FROM LISTINGS;
-SELECT COUNT(*) AS TRANSACTION_COUNT FROM TRANSACTIONS;
-SELECT COUNT(*) AS REVIEW_COUNT FROM REVIEWS;
+SELECT
+    t.TRANSACTION_ID,
+    t.TRANSACTION_CODE,
+
+    customer.USERNAME AS CUSTOMER,
+
+    l.LISTING_CODE,
+    p.TITLE,
+
+    t.LISTING_PRICE,
+    t.AGREED_PRICE,
+    t.DEPOSIT_AMOUNT,
+    t.REMAINING_AMOUNT,
+
+    t.PAYMENT_METHOD,
+    t.PAYMENT_STATUS,
+    t.STATUS,
+
+    t.TRANSACTION_DATE,
+    t.CONTRACT_DATE,
+    t.COMPLETION_DATE
+
+FROM TRANSACTIONS t
+
+         JOIN CUSTOMERS c
+              ON t.CUSTOMER_ID = c.CUSTOMER_ID
+
+         JOIN USERS customer
+              ON c.CUSTOMER_ID = customer.USER_ID
+
+         JOIN LISTINGS l
+              ON t.LISTING_ID = l.LISTING_ID
+
+         JOIN PROPERTIES p
+              ON l.PROPERTY_ID = p.PROPERTY_ID
+
+ORDER BY t.TRANSACTION_DATE DESC;
+
+
+-- ============================================================
+-- 12. CHI TIẾT CÁC LẦN THANH TOÁN
+-- ============================================================
+
+SELECT
+    t.TRANSACTION_CODE,
+
+    p.PAYMENT_CODE,
+    p.AMOUNT,
+    p.PAYMENT_TYPE,
+    p.PAYMENT_METHOD,
+    p.PAYMENT_DATE,
+    p.REFERENCE_NUMBER,
+    p.STATUS,
+    p.NOTE
+
+FROM PAYMENTS p
+
+         JOIN TRANSACTIONS t
+              ON p.TRANSACTION_ID = t.TRANSACTION_ID
+
+ORDER BY
+    t.TRANSACTION_CODE,
+    p.PAYMENT_DATE;
+
+
+-- ============================================================
+-- 13. TỔNG TIỀN ĐÃ THANH TOÁN CHO TỪNG GIAO DỊCH
+-- ============================================================
+
+SELECT
+    t.TRANSACTION_CODE,
+    t.AGREED_PRICE,
+
+    NVL(
+            SUM(
+                    CASE
+                        WHEN p.STATUS = 'SUCCESS'
+                            AND p.PAYMENT_TYPE <> 'REFUND'
+                            THEN p.AMOUNT
+                        ELSE 0
+                        END
+            ),
+            0
+    ) AS TOTAL_PAID,
+
+    t.REMAINING_AMOUNT
+
+FROM TRANSACTIONS t
+
+         LEFT JOIN PAYMENTS p
+                   ON t.TRANSACTION_ID = p.TRANSACTION_ID
+
+GROUP BY
+    t.TRANSACTION_CODE,
+    t.AGREED_PRICE,
+    t.REMAINING_AMOUNT
+
+ORDER BY t.TRANSACTION_CODE;
+
+
+-- ============================================================
+-- 14. GIAO DỊCH ĐÃ HOÀN TẤT
+-- ============================================================
+
+SELECT
+    t.TRANSACTION_CODE,
+    u.USERNAME AS CUSTOMER,
+    p.TITLE,
+    t.AGREED_PRICE,
+    t.COMPLETION_DATE,
+    t.PAYMENT_STATUS,
+    t.STATUS
+FROM TRANSACTIONS t
+         JOIN CUSTOMERS c
+              ON t.CUSTOMER_ID = c.CUSTOMER_ID
+         JOIN USERS u
+              ON c.CUSTOMER_ID = u.USER_ID
+         JOIN LISTINGS l
+              ON t.LISTING_ID = l.LISTING_ID
+         JOIN PROPERTIES p
+              ON l.PROPERTY_ID = p.PROPERTY_ID
+WHERE t.STATUS = 'COMPLETED'
+ORDER BY t.COMPLETION_DATE DESC;
+
+
+-- ============================================================
+-- 15. GIAO DỊCH ĐANG CHỜ XỬ LÝ
+-- ============================================================
+
+SELECT
+    t.TRANSACTION_CODE,
+    u.USERNAME AS CUSTOMER,
+    p.TITLE,
+    t.AGREED_PRICE,
+    t.DEPOSIT_AMOUNT,
+    t.REMAINING_AMOUNT,
+    t.PAYMENT_STATUS,
+    t.STATUS
+FROM TRANSACTIONS t
+         JOIN CUSTOMERS c
+              ON t.CUSTOMER_ID = c.CUSTOMER_ID
+         JOIN USERS u
+              ON c.CUSTOMER_ID = u.USER_ID
+         JOIN LISTINGS l
+              ON t.LISTING_ID = l.LISTING_ID
+         JOIN PROPERTIES p
+              ON l.PROPERTY_ID = p.PROPERTY_ID
+WHERE t.STATUS IN ('PENDING', 'DEPOSITED', 'PROCESSING')
+ORDER BY t.TRANSACTION_DATE DESC;
+
+
+-- ============================================================
+-- 16. DOANH THU ĐÃ HOÀN TẤT
+-- ============================================================
+
+SELECT
+    COUNT(*) AS COMPLETED_TRANSACTIONS,
+    NVL(SUM(AGREED_PRICE), 0) AS TOTAL_REVENUE
+FROM TRANSACTIONS
+WHERE STATUS = 'COMPLETED';
+
+
+-- ============================================================
+-- 17. DOANH THU THEO TỪNG THÁNG
+-- ============================================================
+
+SELECT
+    TO_CHAR(COMPLETION_DATE, 'YYYY-MM') AS MONTH,
+    COUNT(*) AS TRANSACTION_COUNT,
+    SUM(AGREED_PRICE) AS TOTAL_REVENUE
+FROM TRANSACTIONS
+WHERE STATUS = 'COMPLETED'
+GROUP BY TO_CHAR(COMPLETION_DATE, 'YYYY-MM')
+ORDER BY MONTH;
+
+
+-- ============================================================
+-- 18. SỐ LƯỢNG CĂN HỘ THEO TRẠNG THÁI
+-- ============================================================
+
+SELECT
+    STATUS,
+    COUNT(*) AS TOTAL_APARTMENTS
+FROM APARTMENTS
+GROUP BY STATUS
+ORDER BY STATUS;
+
+
+-- ============================================================
+-- 19. SỐ LƯỢNG TIN ĐĂNG THEO OWNER
+-- ============================================================
+
+SELECT
+    u.USERNAME AS OWNER,
+    COUNT(l.LISTING_ID) AS TOTAL_LISTINGS
+FROM OWNERS o
+         JOIN USERS u
+              ON o.OWNER_ID = u.USER_ID
+         LEFT JOIN LISTINGS l
+                   ON o.OWNER_ID = l.OWNER_ID
+GROUP BY u.USERNAME
+ORDER BY TOTAL_LISTINGS DESC;
+
+
+-- ============================================================
+-- 20. TOP CĂN HỘ ĐƯỢC YÊU THÍCH
+-- ============================================================
+
+SELECT
+    p.PROPERTY_ID,
+    p.TITLE,
+    COUNT(f.CUSTOMER_ID) AS FAVORITE_COUNT
+FROM PROPERTIES p
+         LEFT JOIN FAVORITES f
+                   ON p.PROPERTY_ID = f.PROPERTY_ID
+GROUP BY
+    p.PROPERTY_ID,
+    p.TITLE
+ORDER BY FAVORITE_COUNT DESC;
+
+
+-- ============================================================
+-- 21. ĐÁNH GIÁ CĂN HỘ
+-- ============================================================
+
+SELECT
+    p.PROPERTY_ID,
+    p.TITLE,
+    ROUND(AVG(r.RATING), 2) AS AVERAGE_RATING,
+    COUNT(r.REVIEW_ID) AS REVIEW_COUNT
+FROM PROPERTIES p
+         LEFT JOIN REVIEWS r
+                   ON p.PROPERTY_ID = r.PROPERTY_ID
+GROUP BY
+    p.PROPERTY_ID,
+    p.TITLE
+ORDER BY AVERAGE_RATING DESC NULLS LAST;
+
+
+-- ============================================================
+-- 22. DASHBOARD TỔNG QUAN
+-- ============================================================
+
+SELECT
+    (SELECT COUNT(*)
+     FROM BUILDINGS
+     WHERE STATUS = 'ACTIVE') AS TOTAL_BUILDINGS,
+
+    (SELECT COUNT(*)
+     FROM APARTMENTS) AS TOTAL_APARTMENTS,
+
+    (SELECT COUNT(*)
+     FROM PROPERTIES
+     WHERE STATUS = 'AVAILABLE') AS AVAILABLE_PROPERTIES,
+
+    (SELECT COUNT(*)
+     FROM LISTINGS
+     WHERE STATUS = 'ACTIVE') AS ACTIVE_LISTINGS,
+
+    (SELECT COUNT(*)
+     FROM TRANSACTIONS
+     WHERE STATUS = 'COMPLETED') AS COMPLETED_TRANSACTIONS,
+
+    (SELECT NVL(SUM(AGREED_PRICE), 0)
+     FROM TRANSACTIONS
+     WHERE STATUS = 'COMPLETED') AS TOTAL_REVENUE,
+
+    (SELECT NVL(SUM(AMOUNT), 0)
+     FROM PAYMENTS
+     WHERE STATUS = 'SUCCESS'
+       AND PAYMENT_TYPE <> 'REFUND') AS TOTAL_PAID;
+
+
+-- ============================================================
+-- 23. THÔNG TIN ĐẦY ĐỦ: BUILDING -> APARTMENT -> LISTING
+-- ============================================================
+
+SELECT
+    b.BUILDING_NAME,
+    b.DISTRICT,
+
+    a.APARTMENT_CODE,
+    a.FLOOR_NUMBER,
+    a.AREA,
+    a.BEDROOMS,
+    a.BATHROOMS,
+
+    p.TITLE,
+    p.PRICE,
+
+    l.LISTING_CODE,
+    l.ASKING_PRICE,
+    l.STATUS AS LISTING_STATUS
+
+FROM BUILDINGS b
+
+         JOIN APARTMENTS a
+              ON b.BUILDING_ID = a.BUILDING_ID
+
+         JOIN PROPERTIES p
+              ON a.APARTMENT_ID = p.APARTMENT_ID
+
+         LEFT JOIN LISTINGS l
+                   ON p.PROPERTY_ID = l.PROPERTY_ID
+
+ORDER BY
+    b.BUILDING_NAME,
+    a.FLOOR_NUMBER;
+
+
+-- ============================================================
+-- 24. KHÁCH HÀNG + GIAO DỊCH + CĂN HỘ
+-- ============================================================
+
+SELECT
+    u.USERNAME AS CUSTOMER,
+    u.EMAIL,
+
+    t.TRANSACTION_CODE,
+
+    b.BUILDING_NAME,
+    a.APARTMENT_CODE,
+
+    p.TITLE,
+
+    t.AGREED_PRICE,
+    t.DEPOSIT_AMOUNT,
+    t.REMAINING_AMOUNT,
+
+    t.PAYMENT_STATUS,
+    t.STATUS
+
+FROM TRANSACTIONS t
+
+         JOIN CUSTOMERS c
+              ON t.CUSTOMER_ID = c.CUSTOMER_ID
+
+         JOIN USERS u
+              ON c.CUSTOMER_ID = u.USER_ID
+
+         JOIN LISTINGS l
+              ON t.LISTING_ID = l.LISTING_ID
+
+         JOIN PROPERTIES p
+              ON l.PROPERTY_ID = p.PROPERTY_ID
+
+         JOIN APARTMENTS a
+              ON p.APARTMENT_ID = a.APARTMENT_ID
+
+         JOIN BUILDINGS b
+              ON a.BUILDING_ID = b.BUILDING_ID
+
+ORDER BY t.TRANSACTION_DATE DESC;
+
+
+-- ============================================================
+-- 25. OWNER + TIN ĐĂNG + CĂN HỘ
+-- ============================================================
+
+SELECT
+    u.USERNAME AS OWNER,
+    l.LISTING_CODE,
+
+    b.BUILDING_NAME,
+    a.APARTMENT_CODE,
+
+    p.TITLE,
+    l.ASKING_PRICE,
+    l.STATUS
+
+FROM LISTINGS l
+
+         JOIN OWNERS o
+              ON l.OWNER_ID = o.OWNER_ID
+
+         JOIN USERS u
+              ON o.OWNER_ID = u.USER_ID
+
+         JOIN PROPERTIES p
+              ON l.PROPERTY_ID = p.PROPERTY_ID
+
+         JOIN APARTMENTS a
+              ON p.APARTMENT_ID = a.APARTMENT_ID
+
+         JOIN BUILDINGS b
+              ON a.BUILDING_ID = b.BUILDING_ID
+
+ORDER BY l.POST_DATE DESC;
