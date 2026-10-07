@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Apartment Website</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/home.css}">
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header class="header">
+
+    <div class="container navbar">
+
+        <a href="/" class="logo">
+            <div class="logo-icon">⌂</div>
+            <span>Apartment</span>
+        </a>
+
+        <nav class="nav-menu">
+
+            <a href="/" class="active">
+                Trang chủ
+            </a>
+
+            <a href="/properties">
+                Danh sách căn hộ
+            </a>
+
+            <a href="/postings">
+                Đăng tin
+            </a>
+
+            <a href="/comparisons">
+                So sánh
+            </a>
+
+            <a href="/appointments">
+                Lịch xem
+            </a>
+
+            <a href="/about">
+                Về chúng tôi
+            </a>
+
+        </nav>
+
+        <div class="header-actions">
+
+            <button class="notification-btn"
+                    title="Thông báo">
+                🔔
+                <span class="notification-dot"></span>
+            </button>
+
+            <a href="/login"
+               class="login-btn">
+                Đăng nhập
+            </a>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<!-- ================= HERO ================= -->
+
+<section class="hero">
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+
+        <span class="hero-badge">
+            APARTMENT SELLING WEBSITE
+        </span>
+
+        <h1>
+            Tìm nơi ở phù hợp với cuộc sống của bạn
+        </h1>
+
+        <p th:text="${heroSubtitle}">
+            Tìm kiếm, so sánh và giao dịch bất động sản minh bạch hơn
+        </p>
+
+        <!-- SEARCH -->
+
+        <form class="search-box"
+              action="/properties"
+              method="get">
+
+            <div class="search-icon">
+                🔍
+            </div>
+
+            <input
+                    type="text"
+                    name="keyword"
+                    placeholder="Tìm theo khu vực, giá, diện tích..."
+            >
+
+            <button type="submit">
+                Tìm kiếm
+            </button>
+
+        </form>
+
+        <div class="quick-search">
+
+            <span>Tìm nhanh:</span>
+
+            <a href="/properties?location=Thu%20Duc">
+                Thủ Đức
+            </a>
+
+            <a href="/properties?location=Di%20An">
+                Dĩ An
+            </a>
+
+            <a href="/properties?bedrooms=2">
+                2 phòng ngủ
+            </a>
+
+            <a href="/properties?price=under2">
+                Dưới 2 tỷ
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= MAIN ================= -->
+
+<main>
+
+    <!-- QUICK ACTION -->
+
+    <section class="quick-section">
+
+        <div class="container">
+
+            <div class="section-heading center">
+
+                <span class="section-label">
+                    KHÁM PHÁ
+                </span>
+
+                <h2>
+                    Mọi thứ bạn cần cho một giao dịch
+                </h2>
+
+                <p>
+                    Từ tìm kiếm căn hộ đến đặt lịch xem và quản lý giao dịch.
+                </p>
+
+            </div>
+
+
+            <div class="service-grid">
+
+                <div class="service-card"
+                     th:each="service : ${services}">
+
+                    <div class="service-icon"
+                         th:text="${service.icon}">
+                        🏠
+                    </div>
+
+                    <h3 th:text="${service.title}">
+                        Tìm căn hộ
+                    </h3>
+
+                    <p th:text="${service.description}">
+                        Tìm kiếm căn hộ phù hợp.
+                    </p>
+
+                    <a th:href="${service.link}"
+                       class="service-link">
+                        Khám phá →
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FEATURED PROPERTIES -->
+
+    <section class="property-section">
+
+        <div class="container">
+
+            <div class="section-heading">
+
+                <div>
+
+                    <span class="section-label">
+                        NỔI BẬT
+                    </span>
+
+                    <h2>
+                        Căn hộ dành cho bạn
+                    </h2>
+
+                    <p>
+                        Một số bất động sản đang được quan tâm.
+                    </p>
+
+                </div>
+
+                <a href="/properties"
+                   class="view-all">
+                    Xem tất cả →
+                </a>
+
+            </div>
+
+
+            <div class="property-grid">
+
+                <article class="property-card"
+                         th:each="property : ${featuredProperties}">
+
+                    <div class="property-image">
+
+                        <!-- Ảnh thumbnail -->
+                        <img th:if="${property.images != null and !property.images.isEmpty()}"
+                             th:src="${property.images[0].imageUrl}"
+                             th:alt="${property.propertyType}">
+
+                        <!-- Nếu căn hộ chưa có ảnh -->
+                        <div th:if="${property.images == null or property.images.isEmpty()}"
+                             class="property-no-image">
+                            Chưa có hình ảnh
+                        </div>
+
+                        <button class="favorite-btn">
+                            ♡
+                        </button>
+
+                        <span class="property-status"
+                              th:text="${property.status}">
+                AVAILABLE
+            </span>
+
+                    </div>
+
+
+                    <div class="property-content">
+
+                        <div class="property-price">
+                <span th:text="${#numbers.formatDecimal(
+                    property.price,
+                    0,
+                    'COMMA',
+                    0,
+                    'POINT'
+                )}">
+                    0
+                </span>
+                            VNĐ
+                        </div>
+
+
+                        <h3>
+                <span th:text="${property.propertyType}">
+                    APARTMENT
+                </span>
+
+                            <span th:text="${property.bedrooms}">
+                    2
+                </span>
+
+                            phòng ngủ
+                        </h3>
+
+
+                        <p class="property-location">
+                            📍
+
+                            <span th:text="${property.address}">
+                    Địa chỉ
+                </span>,
+
+                            <span th:if="${property.ward != null}"
+                                  th:text="${property.ward}">
+                    Phường
+                </span>
+
+                            <span th:if="${property.district != null}">
+                    ,
+                    <span th:text="${property.district}">
+                        Quận
+                    </span>
+                </span>
+
+                            ,
+                            <span th:text="${property.city}">
+                    Thành phố
+                </span>
+                        </p>
+
+
+                        <div class="property-meta">
+
+                <span>
+                    📐
+                    <b th:text="${property.area}">
+                        68
+                    </b>
+                    m²
+                </span>
+
+                            <span>
+                    🛏
+                    <b th:text="${property.bedrooms}">
+                        2
+                    </b>
+                    PN
+                </span>
+
+                            <span>
+                    🚿
+                    <b th:text="${property.bathrooms}">
+                        2
+                    </b>
+                    WC
+                </span>
+
+                        </div>
+
+
+                        <a th:href="@{/properties/{id}(id=${property.propertyId})}"
+                           class="property-button">
+                            Xem chi tiết
+                        </a>
+
+                    </div>
+
+                </article>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- TRUST / SYSTEM -->
+
+    <section class="trust-section">
+
+        <div class="container trust-wrapper">
+
+            <div class="trust-text">
+
+                <span class="section-label">
+                    AN TÂM GIAO DỊCH
+                </span>
+
+                <h2>
+                    Tìm kiếm thông tin rõ ràng,
+                    giao dịch minh bạch
+                </h2>
+
+                <p>
+                    Apartment Website hỗ trợ người mua và chủ sở hữu
+                    trong suốt quá trình tìm kiếm, xem căn hộ và thực hiện
+                    giao dịch.
+                </p>
+
+                <div class="trust-list">
+
+                    <div class="trust-item">
+                        <span>✓</span>
+                        <div>
+                            <strong>Thông tin rõ ràng</strong>
+                            <p>
+                                Thông tin bất động sản được trình bày tập trung.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="trust-item">
+                        <span>✓</span>
+                        <div>
+                            <strong>Đặt lịch xem</strong>
+                            <p>
+                                Chủ động lựa chọn thời gian xem căn hộ.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="trust-item">
+                        <span>✓</span>
+                        <div>
+                            <strong>Quản lý giao dịch</strong>
+                            <p>
+                                Theo dõi trạng thái giao dịch trên hệ thống.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="trust-card">
+
+                <div class="trust-card-icon">
+                    ✓
+                </div>
+
+                <h3>
+                    Apartment Website
+                </h3>
+
+                <p>
+                    Nền tảng kết nối người mua và chủ sở hữu
+                    trong quy trình giao dịch bất động sản.
+                </p>
+
+                <div class="trust-stat">
+
+                    <div>
+                        <strong>24/7</strong>
+                        <span>Truy cập</span>
+                    </div>
+
+                    <div>
+                        <strong>100%</strong>
+                        <span>Trực tuyến</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- NOTIFICATION -->
+
+    <section class="notification-section">
+
+        <div class="container">
+
+            <div class="notification-panel">
+
+                <div class="notification-header">
+
+                    <div>
+
+                        <span class="section-label">
+                            CẬP NHẬT
+                        </span>
+
+                        <h2>
+                            Thông báo mới
+                        </h2>
+
+                    </div>
+
+                    <button>
+                        Xem tất cả
+                    </button>
+
+                </div>
+
+
+                <div class="notification-list">
+
+                    <div class="notification-item"
+                         th:each="notification : ${notifications}">
+
+                        <div class="notification-icon">
+                            🔔
+                        </div>
+
+                        <div>
+
+                            <h4 th:text="${notification.title}">
+                                Thông báo hệ thống
+                            </h4>
+
+                            <p th:text="${notification.message}">
+                                Nội dung thông báo.
+                            </p>
+
+                        </div>
+
+                        <span class="notification-arrow">
+                            →
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="footer">
+
+    <div class="container footer-content">
+
+        <div class="footer-brand">
+
+            <div class="logo footer-logo">
+                <div class="logo-icon">⌂</div>
+                <span>Apartment</span>
+            </div>
+
+            <p>
+                Nền tảng hỗ trợ tìm kiếm và giao dịch
+                bất động sản trực tuyến.
+            </p>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h4>Khám phá</h4>
+
+            <a href="/properties">
+                Danh sách căn hộ
+            </a>
+
+            <a href="/comparisons">
+                So sánh
+            </a>
+
+            <a href="/appointments">
+                Đặt lịch xem
+            </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h4>Chủ sở hữu</h4>
+
+            <a href="/postings/create">
+                Đăng tin
+            </a>
+
+            <a href="/postings">
+                Quản lý tin
+            </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h4>Hỗ trợ</h4>
+
+            <a href="/about">
+                Về chúng tôi
+            </a>
+
+            <a href="/contact">
+                Liên hệ
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <div class="container">
+
+            © 2026 Apartment Selling Website.
+            All rights reserved.
+
+        </div>
+
+    </div>
+
+</footer>
+
+</body>
+</html>

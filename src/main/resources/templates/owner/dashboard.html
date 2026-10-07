@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Owner Dashboard</title>
+</head>
+
+<body>
+
+<h1>Owner Dashboard</h1>
+
+<p>
+    Welcome,
+    <strong th:text="${owner.username}">
+        Owner
+    </strong>
+</p>
+
+<a th:href="@{/profile}">
+    My Profile
+</a>
+
+<h2>My Postings</h2>
+
+<div th:if="${#lists.isEmpty(postings)}">
+    <p>You do not have any postings yet.</p>
+</div>
+
+<div th:unless="${#lists.isEmpty(postings)}">
+
+    <div th:each="posting : ${postings}">
+
+        <h3 th:text="${posting.title}">
+            Posting title
+        </h3>
+
+        <p>
+            Status:
+            <span th:text="${posting.status}">
+                STATUS
+            </span>
+        </p>
+
+        <a th:href="@{/postings/{id}(id=${posting.postingId})}">
+            View
+        </a>
+
+        <hr>
+
+    </div>
+
+</div>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">
+        Logout
+    </button>
+</form>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile</title>
+</head>
+
+<body>
+
+<h1>My Profile</h1>
+
+<p>
+    Username:
+    <strong th:text="${user.username}">
+        username
+    </strong>
+</p>
+
+<form th:action="@{/profile/update}"
+      method="post">
+
+    <div>
+        <label>Email</label>
+
+        <input
+                type="email"
+                name="email"
+                th:value="${user.email}"
+                required
+        >
+    </div>
+
+    <div>
+        <label>Phone</label>
+
+        <input
+                type="text"
+                name="phone"
+                th:value="${user.phone}"
+        >
+    </div>
+
+    <button type="submit">
+        Update Profile
+    </button>
+
+</form>
+
+<hr>
+
+<form th:action="@{/logout}"
+      method="post">
+
+    <button type="submit">
+        Logout
+    </button>
+
+</form>
+
+</body>
+</html>
