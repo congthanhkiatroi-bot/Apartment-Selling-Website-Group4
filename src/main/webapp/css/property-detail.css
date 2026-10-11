@@ -1,0 +1,19 @@
+/* property-detail.css - trang Chi tiết căn hộ */
+.detail{display:grid;grid-template-columns:1.6fr 1fr;gap:24px}
+.gallery__main{width:100%;height:300px;object-fit:cover;border-radius:12px}
+.gallery__thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.gallery__thumb{width:100%;height:80px;object-fit:cover;border-radius:8px;border:2px solid transparent;cursor:pointer}
+.gallery__thumb.is-active{border-color:var(--green)}
+
+.detail__title{font-size:26px;line-height:1.25;margin-bottom:14px}
+.price-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:18px}
+.price-card__price{font-size:30px;font-weight:700;color:var(--green);padding-bottom:10px;border-bottom:1px solid var(--line);margin:8px 0 12px}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.spec-grid__item--full{grid-column:1/-1}
+
+.detail__desc-title{font-size:20px;margin-bottom:6px}
+.detail__desc{margin-bottom:14px}
+.detail__actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.detail__map{height:120px;border-radius:10px;background:#dfe7e1;display:grid;place-items:center;color:var(--muted)}
+
+@media(max-width:900px){.detail{grid-template-columns:1fr}}
