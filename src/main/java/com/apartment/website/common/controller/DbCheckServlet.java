@@ -17,7 +17,7 @@ import java.sql.Statement;
 @WebServlet("/db-check")
 public class DbCheckServlet extends HttpServlet {
     private static final String[] TABLES = {"users", "customers", "owners", "buildings", "apartments", "properties",
-            "customer_locations", "property_images", "listings", "favorites", "transactions", "payments", "reviews",
+            "customer_locations", "property_images", "listings", "favorites", "transactions", "reviews",
             "property_viewings", "rental_apartments", "rental_apartment_images"};
 
     @Override

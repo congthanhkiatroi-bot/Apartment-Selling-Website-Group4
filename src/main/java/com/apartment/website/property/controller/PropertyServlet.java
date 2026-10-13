@@ -1,11 +1,15 @@
 package com.apartment.website.property.controller;
 
 import com.apartment.website.common.util.View;
+import com.apartment.website.common.exception.ReviewException;
 import com.apartment.website.config.AppContextListener;
+import com.apartment.website.interaction.entity.Review;
+import com.apartment.website.interaction.service.ReviewService;
 import com.apartment.website.property.dto.PageResult;
 import com.apartment.website.property.dto.PropertyFilter;
 import com.apartment.website.property.entity.Property;
 import com.apartment.website.property.service.PropertyService;
+import com.apartment.website.user.entity.Owner;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,15 +24,19 @@ import java.util.*;
 /**
  * /properties      -> danh sách (lọc + phân trang)   -> views/property/list.jsp
  * /properties/{id} -> chi tiết                        -> views/property/detail.jsp
+ * POST /properties/{id}/reviews -> gửi đánh giá (rating + comment), xong redirect về trang chi tiết
  * (thay cho PropertyWebController: @GetMapping("/properties") và @GetMapping("/properties/{id}"))
  */
 @WebServlet("/properties/*")
 public class PropertyServlet extends HttpServlet {
+    private static final List<String> REVIEW_FIELDS = List.of("name", "email", "rating", "comment");
     private PropertyService service;
+    private ReviewService reviews;
 
     @Override
     public void init() {
         service = (PropertyService) getServletContext().getAttribute(AppContextListener.PROPERTY_SERVICE);
+        reviews = (ReviewService) getServletContext().getAttribute(AppContextListener.REVIEW_SERVICE);
     }
 
     @Override
@@ -36,6 +44,28 @@ public class PropertyServlet extends HttpServlet {
             String path = req.getPathInfo();                       // null hoặc "/" = danh sách, "/3" = chi tiết căn id 3
         if (path == null || path.equals("/")) showList(req, resp);
         else showDetail(req, resp, path.substring(1));
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String path = req.getPathInfo();                       // "/3/reviews"
+        if (path == null || !path.matches("/\\d{1,18}/reviews")) { resp.sendError(HttpServletResponse.SC_NOT_FOUND); return; }
+        String idText = path.substring(1, path.indexOf("/reviews"));
+        long id = Long.parseLong(idText);
+        if (service.findById(id).isEmpty()) { resp.sendError(HttpServletResponse.SC_NOT_FOUND); return; }
+        try {
+            boolean created = reviews.submit(id, req.getParameter("name"), req.getParameter("email"),
+                    req.getParameter("rating"), req.getParameter("comment"));
+            // redirect (PRG) để F5 không gửi lại form; #reviews cuộn thẳng xuống phần đánh giá
+            resp.sendRedirect(req.getContextPath() + "/properties/" + id + "?review=" + (created ? "created" : "updated") + "#reviews");
+            return;
+        } catch (ReviewException e) {
+            req.setAttribute("reviewError", e.getMessage());
+        }
+        Map<String, String> form = new HashMap<>();            // giữ lại những gì người dùng đã nhập
+        for (String f : REVIEW_FIELDS) form.put(f, text(req, f));
+        req.setAttribute("reviewForm", form);
+        showDetail(req, resp, idText);
     }
 
     private void showList(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -114,6 +144,16 @@ public class PropertyServlet extends HttpServlet {
         List<Property> same = service.sameDistrict(p);
         req.setAttribute("sameDistrict", same);
         req.setAttribute("otherDistrict", service.otherDistrict(p, same.size()));
+
+        Optional<Owner> owner = service.ownerOf(p.getPropertyId());
+        req.setAttribute("owner", owner.orElse(null));
+        req.setAttribute("ownerListings", owner.map(o -> service.activeListingCount(o.getOwnerId())).orElse(0));
+
+        List<Review> list = reviews.reviews(p.getPropertyId());
+        req.setAttribute("reviews", list);
+        req.setAttribute("reviewSummary", reviews.summary(list));
+        req.setAttribute("reviewStatus", text(req, "review"));     // "created" | "updated" sau khi gửi thành công
+        if (req.getAttribute("reviewForm") == null) req.setAttribute("reviewForm", Map.of("rating", "5"));
         View.forward(req, resp, "property/detail");
     }
 

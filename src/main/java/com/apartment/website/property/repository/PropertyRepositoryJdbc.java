@@ -4,8 +4,10 @@ import com.apartment.website.config.Database;
 import com.apartment.website.property.dto.PageResult;
 import com.apartment.website.property.dto.PropertyFilter;
 import com.apartment.website.property.entity.Property;
+import com.apartment.website.user.entity.Owner;
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /** Lấy dữ liệu thật từ PostgreSQL bằng JDBC. */
@@ -103,6 +105,38 @@ public final class PropertyRepositoryJdbc implements PropertyRepository {
             try (ResultSet rs = ps.executeQuery()) { while (rs.next()) items.add(map(rs, List.of())); }
         } catch (SQLException e) { throw new RuntimeException(e); }
         return items;
+    }
+
+    @Override
+    public Optional<Owner> ownerOf(long propertyId) {
+        String sql = """
+                SELECT u.user_id, u.username, u.email, u.password_hash, u.created_at, u.is_active,
+                       o.phone              -- owners.phone (trước đây tên là tax_code, nhóm đã đổi tên cột)
+                FROM listings l
+                JOIN owners o ON o.owner_id = l.owner_id
+                JOIN users u ON u.user_id = o.owner_id
+                WHERE l.property_id = ?
+                ORDER BY (l.status = 'ACTIVE') DESC, l.post_date DESC
+                LIMIT 1
+                """;
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, propertyId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) return Optional.empty();
+                return Optional.of(new Owner(rs.getLong("user_id"), rs.getString("username"), rs.getString("email"),
+                        rs.getString("password_hash"), rs.getObject("created_at", LocalDateTime.class),
+                        rs.getInt("is_active") == 1, rs.getString("phone")));
+            }
+        } catch (SQLException e) { throw new RuntimeException(e); }
+    }
+
+    @Override
+    public int activeListingCount(long ownerId) {
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(
+                "SELECT COUNT(*) FROM listings WHERE owner_id = ? AND status = 'ACTIVE'")) {
+            ps.setLong(1, ownerId);
+            try (ResultSet rs = ps.executeQuery()) { rs.next(); return rs.getInt(1); }
+        } catch (SQLException e) { throw new RuntimeException(e); }
     }
 
     private static void bind(PreparedStatement ps, List<Object> args) throws SQLException {

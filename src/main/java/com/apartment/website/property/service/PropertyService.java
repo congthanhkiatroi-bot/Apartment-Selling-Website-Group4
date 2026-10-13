@@ -4,6 +4,7 @@ import com.apartment.website.property.dto.PageResult;
 import com.apartment.website.property.dto.PropertyFilter;
 import com.apartment.website.property.entity.Property;
 import com.apartment.website.property.repository.PropertyRepository;
+import com.apartment.website.user.entity.Owner;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,9 @@ public class PropertyService {
     public List<String> districts() {
         return repository.districts();
     }
+    public Optional<Owner> ownerOf(long propertyId) { return repository.ownerOf(propertyId); }
+    public int activeListingCount(long ownerId) { return repository.activeListingCount(ownerId); }
+
     /** "Căn hộ tương tự" ở cuối trang chi tiết: tối đa 6 căn cùng quận. */
     public List<Property> sameDistrict(Property p) {
         return repository.similar(p, true, 6);
