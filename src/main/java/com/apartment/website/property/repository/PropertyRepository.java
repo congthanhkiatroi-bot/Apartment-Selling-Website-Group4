@@ -11,4 +11,6 @@ public interface PropertyRepository {
     PageResult<Property> search(PropertyFilter filter, int page, int size);
     Optional<Property> findById(long id);
     List<String> districts();
+    /** Căn tương tự căn p (cùng loại Bán/Thuê, giá & diện tích gần). sameDistrict = true: cùng quận, false: quận khác. */
+    List<Property> similar(Property p, boolean sameDistrict, int limit);
 }

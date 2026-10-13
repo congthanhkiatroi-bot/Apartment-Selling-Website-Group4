@@ -83,6 +83,28 @@ public final class PropertyRepositoryJdbc implements PropertyRepository {
         return list;
     }
 
+    @Override
+    public List<Property> similar(Property p, boolean sameDistrict, int limit) {
+        // Lọc cứng theo quận (= hoặc <>), rồi chấm điểm: giá lệch <= 30% +2, diện tích lệch <= 20% +1.
+        // Căn giống nhất lên đầu, hòa điểm thì căn có giá gần hơn đứng trước.
+        String sql = "SELECT " + COLS + FROM
+                + "WHERE p.status = 'AVAILABLE' AND p.listing_type = ? AND p.property_id <> ? AND b.district "
+                + (sameDistrict ? "= ?" : "<> ?") + """
+                 ORDER BY (CASE WHEN p.price BETWEEN ? * 0.7 AND ? * 1.3 THEN 2 ELSE 0 END)
+                        + (CASE WHEN a.area BETWEEN ? * 0.8 AND ? * 1.2 THEN 1 ELSE 0 END) DESC,
+                          ABS(p.price - ?), p.created_at DESC
+                 LIMIT ?
+                """;
+        BigDecimal price = p.getPrice() == null ? BigDecimal.ZERO : p.getPrice();
+        BigDecimal area = new BigDecimal(p.getArea());
+        List<Property> items = new ArrayList<>();
+        try (Connection c = Database.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+            bind(ps, List.of(p.getListingType(), p.getPropertyId(), p.getDistrict(), price, price, area, area, price, limit));
+            try (ResultSet rs = ps.executeQuery()) { while (rs.next()) items.add(map(rs, List.of())); }
+        } catch (SQLException e) { throw new RuntimeException(e); }
+        return items;
+    }
+
     private static void bind(PreparedStatement ps, List<Object> args) throws SQLException {
         for (int i = 0; i < args.size(); i++) ps.setObject(i + 1, args.get(i));
     }

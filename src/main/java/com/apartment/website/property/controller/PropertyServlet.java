@@ -111,6 +111,9 @@ public class PropertyServlet extends HttpServlet {
         req.setAttribute("property", p);
         req.setAttribute("mainImage", urls.get(sel));
         req.setAttribute("images", thumbs);
+        List<Property> same = service.sameDistrict(p);
+        req.setAttribute("sameDistrict", same);
+        req.setAttribute("otherDistrict", service.otherDistrict(p, same.size()));
         View.forward(req, resp, "property/detail");
     }
 

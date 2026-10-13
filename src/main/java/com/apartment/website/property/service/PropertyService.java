@@ -36,4 +36,12 @@ public class PropertyService {
     public List<String> districts() {
         return repository.districts();
     }
+    /** "Căn hộ tương tự" ở cuối trang chi tiết: tối đa 6 căn cùng quận. */
+    public List<Property> sameDistrict(Property p) {
+        return repository.similar(p, true, 6);
+    }
+    /** Gợi ý khu vực khác: lấp cho đủ 6 ô nếu cùng quận còn thiếu, và luôn có ít nhất 3 căn. */
+    public List<Property> otherDistrict(Property p, int sameCount) {
+        return repository.similar(p, false, Math.max(3, 6 - sameCount));
+    }
 }

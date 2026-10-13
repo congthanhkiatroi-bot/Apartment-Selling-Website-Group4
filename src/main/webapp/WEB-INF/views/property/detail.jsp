@@ -44,9 +44,42 @@
           <button class="btn btn--outline" type="submit" style="cursor:pointer">Thêm vào so sánh</button>
         </form>
       </div>
-      <div class="detail__map">Bản đồ vị trí</div>
+
     </section>
   </div>
+
+  <!-- PHẦN 1 - CÙNG QUẬN: Controller gửi "sameDistrict" (cùng loại Bán/Thuê, cùng quận, giá & diện tích gần) -->
+  <c:if test="${not empty sameDistrict}">
+  <section class="similar">
+    <div class="similar__head">
+      <h2 class="similar__title">Căn hộ tương tự tại <c:out value="${property.district}"/></h2>
+      <c:url var="moreUrl" value="/properties"><c:param name="type" value="${property.rent ? 'RENT' : 'SALE'}"/><c:param name="district" value="${property.district}"/></c:url>
+      <a class="similar__more" href="${moreUrl}">Xem tất cả →</a>
+    </div>
+    <div class="similar__grid">
+      <c:forEach var="it" items="${sameDistrict}">
+        <c:set var="card" value="${it}" scope="request"/>
+        <jsp:include page="/WEB-INF/views/partials/similar-card.jsp"/>
+      </c:forEach>
+    </div>
+  </section>
+  </c:if>
+
+  <!-- PHẦN 2 - KHU VỰC KHÁC: Controller gửi "otherDistrict" (quận khác nhưng giá & diện tích gần) -->
+  <c:if test="${not empty otherDistrict}">
+  <section class="similar">
+    <div class="similar__head">
+      <h2 class="similar__title">Gợi ý ở khu vực khác</h2>
+      <span class="similar__note">Mức giá và diện tích tương đương</span>
+    </div>
+    <div class="similar__grid">
+      <c:forEach var="it" items="${otherDistrict}">
+        <c:set var="card" value="${it}" scope="request"/>
+        <jsp:include page="/WEB-INF/views/partials/similar-card.jsp"/>
+      </c:forEach>
+    </div>
+  </section>
+  </c:if>
 </main>
 
 <jsp:include page="/WEB-INF/views/partials/footer.jsp"/>
