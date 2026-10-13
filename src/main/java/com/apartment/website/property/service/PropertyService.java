@@ -10,8 +10,8 @@ import java.util.Optional;
 
 /** Logic nghiệp vụ về căn hộ. Class Java thường: không cần @Service. */
 public class PropertyService {
-    public static final int PAGE_SIZE = 6;          // căn BÁN: 6 căn / trang
-    public static final int RENT_PAGE_SIZE = 9;    // căn THUÊ: 12 căn / trang (3 cột x 4 hàng)
+    public static final int PAGE_SIZE = 12;        // căn BÁN: 12 căn / trang (3 cột x 4 hàng)
+    public static final int RENT_PAGE_SIZE = 12;   // căn THUÊ: 12 căn / trang
     private final PropertyRepository repository;
 
     public PropertyService(PropertyRepository repository) {   // thay @Autowired: truyền qua constructor
@@ -23,10 +23,17 @@ public class PropertyService {
         return repository.search(filter, Math.max(1, page), size);
     }
 
-    public List<Property> featured(int count) {
-        return repository.search(new PropertyFilter("", "", null, ""), 1, count).getItems();
+    public List<Property> featured(int count) { // Phương thức featured
+        return repository.search(new PropertyFilter("", "", null, ""),
+                1,
+                count
+        ).getItems(); // trả về PageResult<Property>
     }
 
-    public Optional<Property> findById(long id) { return repository.findById(id); }
-    public List<String> districts() { return repository.districts(); }
+    public Optional<Property> findById(long id) {
+        return repository.findById(id);
+    }
+    public List<String> districts() {
+        return repository.districts();
+    }
 }

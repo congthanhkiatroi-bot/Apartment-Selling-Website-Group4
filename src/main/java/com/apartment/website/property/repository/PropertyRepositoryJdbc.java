@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
 
-/** Lấy dữ liệu thật từ PostgreSQL bằng JDBC. Chỉ cần bật data.mode=postgres trong config.properties. */
+/** Lấy dữ liệu thật từ PostgreSQL bằng JDBC. */
 public final class PropertyRepositoryJdbc implements PropertyRepository {
 
     private static final String COLS = """

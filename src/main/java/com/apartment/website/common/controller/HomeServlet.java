@@ -11,7 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 
-/** GET /  ->  views/home.jsp  (thay cho HomeController của Spring) */
+/** GET /  ->  views/home.jsp */
 @WebServlet(urlPatterns = {"", "/home"})
 public class HomeServlet extends HttpServlet {
     private PropertyService propertyService;
@@ -24,7 +24,7 @@ public class HomeServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setAttribute("active", "home");                          // đánh dấu mục menu (header.jsp đọc ${active})
-        req.setAttribute("featured", propertyService.featured(3));   // = model.addAttribute(...)
+        req.setAttribute("featured", propertyService.featured(3));   // = model.addAttribute(...) Phương thức featured
         View.forward(req, resp, "home");
     }
 }

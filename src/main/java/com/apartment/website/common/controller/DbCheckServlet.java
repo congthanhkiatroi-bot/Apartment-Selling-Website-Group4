@@ -24,7 +24,6 @@ public class DbCheckServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         resp.setContentType("text/plain;charset=UTF-8");
         PrintWriter out = resp.getWriter();
-        out.println("data.mode = " + Database.get("data.mode", "mock"));
         out.println("db.url    = " + Database.get("db.url", "(chua cau hinh)"));
         out.println("db.user   = " + Database.get("db.user", ""));
         out.println();

@@ -1,8 +1,10 @@
 package com.apartment.website.config;
 
+import com.apartment.website.appointment.repository.AppointmentRepository;
+import com.apartment.website.appointment.repository.AppointmentRepositoryJdbc;
+import com.apartment.website.appointment.service.AppointmentService;
 import com.apartment.website.property.repository.PropertyRepository;
 import com.apartment.website.property.repository.PropertyRepositoryJdbc;
-import com.apartment.website.property.repository.PropertyRepositoryMock;
 import com.apartment.website.property.service.PropertyService;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
@@ -17,19 +19,22 @@ import jakarta.servlet.annotation.WebListener;
 @WebListener
 public class AppContextListener implements ServletContextListener {
     public static final String PROPERTY_SERVICE = "propertyService";
+    public static final String APPOINTMENT_SERVICE = "appointmentService";
 
     @Override
     public void contextInitialized(ServletContextEvent event) {
         ServletContext ctx = event.getServletContext();
         ctx.setAttribute("ctx", ctx.getContextPath());                 // JSP dùng ${ctx} để ghép đường dẫn
 
-        boolean usePg = Database.get("data.mode", "mock").equalsIgnoreCase("postgres");
-        PropertyRepository propertyRepository = usePg ? new PropertyRepositoryJdbc() : new PropertyRepositoryMock();
+        PropertyRepository propertyRepository = new PropertyRepositoryJdbc();
         PropertyService propertyService = new PropertyService(propertyRepository);   // = @Autowired bằng constructor
         ctx.setAttribute(PROPERTY_SERVICE, propertyService);
 
+        AppointmentRepository appointmentRepository = new AppointmentRepositoryJdbc();
+        ctx.setAttribute(APPOINTMENT_SERVICE, new AppointmentService(appointmentRepository));
+
         // Thêm tính năng mới: new XxxRepository -> new XxxService(repo) -> ctx.setAttribute(...)
-        ctx.log("Apartment web khoi dong, data.mode=" + (usePg ? "postgres" : "mock"));
+        ctx.log("Apartment web khoi dong (PostgreSQL)");
     }
 
     @Override

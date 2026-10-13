@@ -28,3 +28,14 @@
 
 @media(max-width:900px){.apartment-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.apartment-grid{grid-template-columns:1fr}.compare-tray{display:none}}
+
+/* Phân trang nhiều trang: « 1 2 3 … 10 » */
+.result-range{color:var(--muted);font-size:15px}
+.pagination{flex-wrap:wrap}
+.pagination__item:first-child{border-radius:8px 0 0 8px}
+.pagination__item:last-child{border-radius:0 8px 8px 0}
+a.pagination__item:hover{background:var(--green-soft)}
+.pagination__item.is-disabled{color:#b6bcc4;cursor:default}
+a.pagination__item{text-decoration:none;color:inherit}
+a.pagination__item.is-active,a.pagination__item.is-active:hover{background:var(--green);color:#fff;border-color:var(--green)}
+span.pagination__item{cursor:default}

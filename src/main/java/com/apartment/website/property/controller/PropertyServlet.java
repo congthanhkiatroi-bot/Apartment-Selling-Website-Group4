@@ -33,7 +33,7 @@ public class PropertyServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo();                       // null hoặc "/" = danh sách, "/3" = chi tiết căn id 3
+            String path = req.getPathInfo();                       // null hoặc "/" = danh sách, "/3" = chi tiết căn id 3
         if (path == null || path.equals("/")) showList(req, resp);
         else showDetail(req, resp, path.substring(1));
     }
@@ -43,16 +43,20 @@ public class PropertyServlet extends HttpServlet {
         String type = "RENT".equalsIgnoreCase(text(req, "type")) ? "RENT" : "SALE";
         Integer bedrooms = toInt(req.getParameter("bedrooms"));
         int page = Math.max(1, Optional.ofNullable(toInt(req.getParameter("page"))).orElse(1));
-        PageResult<Property> result = service.search(new PropertyFilter(keyword, district, bedrooms, price, type), page);
+        PropertyFilter filter = new PropertyFilter(keyword, district, bedrooms, price, type);
+        PageResult<Property> result = service.search(filter, page);
+        if (page > result.getTotalPages()) {                   // gõ page quá lớn -> lùi về trang cuối
+            page = result.getTotalPages();
+            result = service.search(filter, page);
+        }
 
         List<Map<String, Object>> districts = new ArrayList<>();
         for (String d : service.districts()) districts.add(Map.of("value", d, "selected", d.equals(district) ? "selected" : ""));
 
         String base = req.getContextPath() + "/properties?keyword=" + enc(keyword) + "&district=" + enc(district)
-                + "&price=" + enc(price) + "&type=" + type + "&bedrooms=" + (bedrooms == null ? "" : bedrooms);
-        List<Map<String, Object>> pages = new ArrayList<>();
-        for (int i = 1; i <= result.getTotalPages(); i++)
-            pages.add(Map.of("label", String.valueOf(i), "href", base + "&page=" + i, "active", i == page ? "is-active" : ""));
+                + "&price=" + enc(price) + "&type=" + type + "&bedrooms=" + (bedrooms == null ? "" : bedrooms) + "&page=";
+        long from = result.getTotal() == 0 ? 0 : (long) (page - 1) * result.getSize() + 1;   // "hiển thị from–to"
+        long to = Math.min((long) page * result.getSize(), result.getTotal());
 
         req.setAttribute("active", "list");
         req.setAttribute("type", type);
@@ -60,8 +64,34 @@ public class PropertyServlet extends HttpServlet {
         req.setAttribute("total", result.getTotal());
         req.setAttribute("noResult", result.getItems().isEmpty());
         req.setAttribute("districts", districts);
-        req.setAttribute("pages", pages);
+        req.setAttribute("from", from);
+        req.setAttribute("to", to);
+        req.setAttribute("totalPages", result.getTotalPages());
+        req.setAttribute("pages", pageLinks(base, page, result.getTotalPages()));
         View.forward(req, resp, "property/list");
+    }
+
+    /** « 1 2 3 … 10 »: luôn có trang đầu, trang cuối và 2 trang quanh trang hiện tại. href = null nghĩa là không bấm được. */
+    private static List<Map<String, Object>> pageLinks(String base, int current, int total) {
+        List<Map<String, Object>> out = new ArrayList<>();
+        out.add(link("«", current > 1 ? base + (current - 1) : null, false));
+        int last = 0;
+        for (int i = 1; i <= total; i++) {
+            if (i != 1 && i != total && Math.abs(i - current) > 2) continue;
+            if (i - last > 1) out.add(link("…", null, false));
+            out.add(link(String.valueOf(i), base + i, i == current));
+            last = i;
+        }
+        out.add(link("»", current < total ? base + (current + 1) : null, false));
+        return out;
+    }
+
+    private static Map<String, Object> link(String label, String href, boolean active) {
+        Map<String, Object> m = new HashMap<>();      // HashMap vì href có thể là null (Map.of không cho null)
+        m.put("label", label);
+        m.put("href", href);
+        m.put("active", active);
+        return m;
     }
 
     private void showDetail(HttpServletRequest req, HttpServletResponse resp, String idText) throws ServletException, IOException {
