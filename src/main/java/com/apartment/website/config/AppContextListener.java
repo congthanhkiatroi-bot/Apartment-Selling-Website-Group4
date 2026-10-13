@@ -12,7 +12,6 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 
 /**
- * "Nơi lắp ráp" thay cho @Autowired / @Service / @Repository của Spring:
  * chạy 1 lần khi Tomcat khởi động, tự tay new các đối tượng và truyền vào nhau qua constructor,
  * rồi cất vào ServletContext để các Servlet lấy ra dùng.
  */

@@ -7,6 +7,7 @@
   <title>So sánh căn hộ</title>
   <link rel="stylesheet" href="${ctx}/css/base.css">
   <link rel="stylesheet" href="${ctx}/css/layout.css">
+  <link rel="stylesheet" href="${ctx}/css/compare.css">
 </head>
 <body id="top">
 <jsp:include page="/WEB-INF/views/partials/header.jsp"/>
