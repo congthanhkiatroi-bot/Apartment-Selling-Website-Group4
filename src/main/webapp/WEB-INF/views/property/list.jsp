@@ -60,7 +60,7 @@
         <p class="apartment-card__location">📍 <c:out value="${it.district}"/>, <c:out value="${it.city}"/></p>
         <p class="apartment-card__meta"><span>🛏 <c:out value="${it.bedrooms}"/> PN</span>|<span>🛁 <c:out value="${it.bathrooms}"/> WC</span>|<span>📐 <c:out value="${it.area}"/>m²</span></p>
         <div class="apartment-card__actions">
-          <a class="btn btn--primary" href="${ctx}/properties/<c:out value="${it.propertyId}"/>">Xem chi tiết</a>
+          <a class="btn btn--primary" href="${ctx}/properties?action=detail&id=<c:out value="${it.propertyId}"/>">Xem chi tiết</a>
           <form method="post" action="${ctx}/comparisons" style="display:contents">
             <input type="hidden" name="action" value="add"><input type="hidden" name="id" value="<c:out value="${it.propertyId}"/>">
             <button class="btn btn--outline" type="submit" style="cursor:pointer">⊞ Thêm so sánh</button>

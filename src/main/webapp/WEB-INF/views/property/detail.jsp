@@ -85,8 +85,10 @@
         <c:if test="${reviewStatus == 'updated'}"><p class="alert alert--ok">Đã cập nhật đánh giá trước đó của bạn.</p></c:if>
         <c:if test="${not empty reviewError}"><p class="alert alert--err"><c:out value="${reviewError}"/></p></c:if>
 
-        <!-- FORM: POST /properties/{id}/reviews. Chọn sao bằng radio (không cần JavaScript). -->
-        <form class="review-form" method="post" action="${ctx}/properties/${property.propertyId}/reviews#reviews">
+        <!-- FORM: POST /properties với action=review & id=<mã căn> (2 ô ẩn). Chọn sao bằng radio (không cần JavaScript). -->
+        <form class="review-form" method="post" action="${ctx}/properties#reviews">
+          <input type="hidden" name="action" value="review">
+          <input type="hidden" name="id" value="<c:out value="${property.propertyId}"/>">
           <p class="field__label">Bạn chấm căn hộ này mấy sao?</p>
           <div class="star-input" role="radiogroup" aria-label="Số sao">
             <c:forEach var="s" begin="1" end="5">

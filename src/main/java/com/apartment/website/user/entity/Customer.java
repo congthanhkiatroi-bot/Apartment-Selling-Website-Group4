@@ -18,6 +18,11 @@ public class Customer extends User {
         this.locations = locations;
     }
 
-    public long getCustomerId() { return getUserId(); }
-    public List<String> getLocations() { return locations; }
+    public long getCustomerId() {
+        return getUserId();
+    }
+
+    public List<String> getLocations() {
+        return locations;
+    }
 }

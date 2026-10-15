@@ -11,48 +11,168 @@ import java.util.Locale;
 public class Property {
     public static final String NO_IMAGE = "/images/apartment-sample.jpg";
 
-    private final long propertyId; private final String title; private final BigDecimal price;
-    private final String priceText, pricePerM2Text, description, address, buildingName, district, city;
-    private final int floor; private final String area; private final int bedrooms, bathrooms;
-    private final String direction, legalStatus, status, thumbnailUrl; private final List<String> imageUrls;
+    private final long propertyId;
+    private final String title;
+    private final BigDecimal price;
+    private final String priceText;
+    private final String pricePerM2Text;
+    private final String description;
+    private final String address;
+    private final String buildingName;
+    private final String district;
+    private final String city;
+    private final int floor;
+    private final String area;
+    private final int bedrooms;
+    private final int bathrooms;
+    private final String direction;
+    private final String legalStatus;
+    private final String status;
+    private final String thumbnailUrl;
+    private final List<String> imageUrls;
     private final String listingType;
 
     public Property(long propertyId, String title, BigDecimal price, String priceText, String pricePerM2Text,
                     String description, String address, String buildingName, String district, String city,
                     int floor, String area, int bedrooms, int bathrooms, String direction, String legalStatus,
                     String status, String thumbnailUrl, List<String> imageUrls, String listingType) {
-        this.propertyId = propertyId; this.title = title; this.price = price; this.priceText = priceText;
-        this.pricePerM2Text = pricePerM2Text; this.description = description; this.address = address;
-        this.buildingName = buildingName; this.district = district; this.city = city; this.floor = floor;
-        this.area = area; this.bedrooms = bedrooms; this.bathrooms = bathrooms; this.direction = direction;
-        this.legalStatus = legalStatus; this.status = status; this.thumbnailUrl = thumbnailUrl; this.imageUrls = imageUrls;
-        this.listingType = listingType == null ? "SALE" : listingType;
+        this.propertyId = propertyId;
+        this.title = title;
+        this.price = price;
+        this.priceText = priceText;
+        this.pricePerM2Text = pricePerM2Text;
+        this.description = description;
+        this.address = address;
+        this.buildingName = buildingName;
+        this.district = district;
+        this.city = city;
+        this.floor = floor;
+        this.area = area;
+        this.bedrooms = bedrooms;
+        this.bathrooms = bathrooms;
+        this.direction = direction;
+        this.legalStatus = legalStatus;
+        this.status = status;
+        this.thumbnailUrl = thumbnailUrl;
+        this.imageUrls = imageUrls;
+        if (listingType == null) {
+            this.listingType = "SALE";
+        } else {
+            this.listingType = listingType;
+        }
     }
 
-    public long getPropertyId() { return propertyId; }   public String getTitle() { return title; }
-    public BigDecimal getPrice() { return price; }       public String getPriceText() { return "RENT".equals(listingType) ? priceText + "/tháng" : priceText; }
-    public String getPricePerM2Text() { return pricePerM2Text; }  public String getDescription() { return description; }
-    public String getAddress() { return address; }       public String getBuildingName() { return buildingName; }
-    public String getDistrict() { return district; }     public String getCity() { return city; }
-    public int getFloor() { return floor; }              public String getArea() { return area; }
-    public int getBedrooms() { return bedrooms; }        public int getBathrooms() { return bathrooms; }
-    public String getDirection() { return direction; }   public String getLegalStatus() { return legalStatus; }
-    public String getStatus() { return status; }         public String getThumbnailUrl() { return thumbnailUrl; }
-    public List<String> getImageUrls() { return imageUrls; }
-    public String getListingType() { return listingType; }
-    public boolean isRent() { return "RENT".equals(listingType); }
+    public long getPropertyId() {
+        return propertyId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    /** Căn thuê thêm "/tháng" phía sau giá. */
+    public String getPriceText() {
+        if (isRent()) {
+            return priceText + "/tháng";
+        }
+        return priceText;
+    }
+
+    public String getPricePerM2Text() {
+        return pricePerM2Text;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public int getFloor() {
+        return floor;
+    }
+
+    public String getArea() {
+        return area;
+    }
+
+    public int getBedrooms() {
+        return bedrooms;
+    }
+
+    public int getBathrooms() {
+        return bathrooms;
+    }
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public String getLegalStatus() {
+        return legalStatus;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public List<String> getImageUrls() {
+        return imageUrls;
+    }
+
+    public String getListingType() {
+        return listingType;
+    }
+
+    /** JSP đọc là ${property.rent} */
+    public boolean isRent() {
+        return "RENT".equals(listingType);
+    }
 
     /** Ảnh trong DB có thể là "images/a.jpg" (thiếu dấu /) -> chuẩn hóa để JSP ghép đúng đường dẫn. */
-    public static String imageUrl(String u) {
-        if (u == null || u.isBlank()) return NO_IMAGE;
-        return (u.startsWith("/") || u.startsWith("http")) ? u : "/" + u;
+    public static String imageUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return NO_IMAGE;
+        }
+        if (url.startsWith("/") || url.startsWith("http")) {
+            return url;
+        }
+        return "/" + url;
     }
 
     /** 2800000000 -> "2.8 Tỷ", 35000000 -> "35 Triệu". */
-    public static String priceText(BigDecimal p) {
-        if (p == null) return "";
-        double v = p.doubleValue();
-        if (v >= 1e9) return String.format(Locale.US, "%.1f Tỷ", v / 1e9).replace(".0 ", " ");
-        return String.format(Locale.US, "%.0f Triệu", v / 1e6);
+    public static String priceText(BigDecimal price) {
+        if (price == null) {
+            return "";
+        }
+        double value = price.doubleValue();
+        if (value >= 1e9) {
+            String text = String.format(Locale.US, "%.1f Tỷ", value / 1e9);
+            // "3.0 Tỷ" -> "3 Tỷ"
+            return text.replace(".0 ", " ");
+        }
+        return String.format(Locale.US, "%.0f Triệu", value / 1e6);
     }
 }

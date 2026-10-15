@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * /comparisons
@@ -27,67 +26,101 @@ import java.util.Optional;
 public class ComparisonServlet extends HttpServlet {
     public static final int MAX_ITEMS = 3;
     private static final String SESSION_KEY = "compareIds";
-    private PropertyService service;
+
+    private PropertyService propertyService;
 
     @Override
     public void init() {
-        service = (PropertyService) getServletContext().getAttribute(AppContextListener.PROPERTY_SERVICE);
+        propertyService = (PropertyService) getServletContext().getAttribute(AppContextListener.PROPERTY_SERVICE);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession(true);
-        List<Property> items = new ArrayList<>();
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession(true);
+        List<Property> items = new ArrayList<Property>();
+
         synchronized (session) {
-            List<Long> ids = ids(session);
-            List<Long> valid = new ArrayList<>();
-            for (Long id : ids) {
-                Optional<Property> p = service.findById(id);
-                if (p.isPresent()) { items.add(p.get()); valid.add(id); }   // căn đã bị xóa khỏi DB thì tự bỏ
+            List<Long> ids = getIds(session);
+            List<Long> validIds = new ArrayList<Long>();
+            for (int i = 0; i < ids.size(); i++) {
+                Long id = ids.get(i);
+                Property property = propertyService.findById(id);
+                // căn đã bị xóa khỏi DB thì tự bỏ ra khỏi danh sách
+                if (property != null) {
+                    items.add(property);
+                    validIds.add(id);
+                }
             }
             ids.clear();
-            ids.addAll(valid);
+            ids.addAll(validIds);
         }
-        List<Integer> emptySlots = new ArrayList<>();
-        for (int i = items.size(); i < MAX_ITEMS; i++) emptySlots.add(i + 1);
 
-        req.setAttribute("active", "compare");
-        req.setAttribute("items", items);
-        req.setAttribute("emptySlots", emptySlots);
-        req.setAttribute("canAdd", items.size() < MAX_ITEMS);
-        req.setAttribute("full", "1".equals(req.getParameter("full")));
-        req.setAttribute("maxItems", MAX_ITEMS);
-        View.forward(req, resp, "comparison/compare");
+        // các ô trống còn lại để hiện nút "+ Thêm căn hộ"
+        List<Integer> emptySlots = new ArrayList<Integer>();
+        for (int i = items.size(); i < MAX_ITEMS; i++) {
+            emptySlots.add(i + 1);
+        }
+
+        request.setAttribute("active", "compare");
+        request.setAttribute("items", items);
+        request.setAttribute("emptySlots", emptySlots);
+        request.setAttribute("canAdd", items.size() < MAX_ITEMS);
+        request.setAttribute("full", "1".equals(request.getParameter("full")));
+        request.setAttribute("maxItems", MAX_ITEMS);
+        View.forward(request, response, "comparison/compare");
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String action = req.getParameter("action");
-        Long id = toLong(req.getParameter("id"));
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String action = request.getParameter("action");
+        Long id = toLong(request.getParameter("id"));
         boolean full = false;
-        HttpSession session = req.getSession(true);
+
+        HttpSession session = request.getSession(true);
         synchronized (session) {
-            List<Long> ids = ids(session);
+            List<Long> ids = getIds(session);
             if ("add".equals(action) && id != null) {
                 if (!ids.contains(id)) {
-                    if (ids.size() >= MAX_ITEMS) full = true;
-                    else if (service.findById(id).isPresent()) ids.add(id);
+                    if (ids.size() >= MAX_ITEMS) {
+                        full = true;
+                    } else if (propertyService.findById(id) != null) {
+                        ids.add(id);
+                    }
                 }
             } else if ("remove".equals(action) && id != null) {
-                ids.remove(id);          // id là Long (object) -> remove theo giá trị, không phải theo vị trí
+                // id là Long (object) -> remove theo giá trị, không phải theo vị trí
+                ids.remove(id);
             } else if ("clear".equals(action)) {
                 ids.clear();
             }
         }
-        resp.sendRedirect(req.getContextPath() + "/comparisons" + (full ? "?full=1" : ""));
+
+        String url = request.getContextPath() + "/comparisons";
+        if (full) {
+            url = url + "?full=1";
+        }
+        response.sendRedirect(url);
     }
 
+    /** Danh sách id căn đang so sánh, lưu trong session. Chưa có thì tạo mới. */
     @SuppressWarnings("unchecked")
-    private static List<Long> ids(HttpSession session) {
+    private static List<Long> getIds(HttpSession session) {
         List<Long> ids = (List<Long>) session.getAttribute(SESSION_KEY);
-        if (ids == null) { ids = new ArrayList<>(); session.setAttribute(SESSION_KEY, ids); }
+        if (ids == null) {
+            ids = new ArrayList<Long>();
+            session.setAttribute(SESSION_KEY, ids);
+        }
         return ids;
     }
 
-    private static Long toLong(String s) { try { return Long.valueOf(s.trim()); } catch (Exception e) { return null; } }
+    private static Long toLong(String text) {
+        if (text == null) {
+            return null;
+        }
+        try {
+            return Long.valueOf(text.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

@@ -4,7 +4,6 @@ import com.apartment.website.appointment.entity.Appointment;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public interface AppointmentRepository {
@@ -17,5 +16,6 @@ public interface AppointmentRepository {
     /** Lưu lịch hẹn, trả về id. Ném SlotTakenException nếu khung giờ đã bị đặt. */
     long create(Appointment appointment);
 
-    Optional<Appointment> findById(long id);
+    /** Trả về null nếu không có lịch hẹn với id này. */
+    Appointment findById(long id);
 }

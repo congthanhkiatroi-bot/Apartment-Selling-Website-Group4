@@ -1,8 +1,9 @@
 package com.apartment.website.property.controller;
 
-import com.apartment.website.common.util.View;
 import com.apartment.website.common.exception.ReviewException;
+import com.apartment.website.common.util.View;
 import com.apartment.website.config.AppContextListener;
+import com.apartment.website.interaction.dto.ReviewSummary;
 import com.apartment.website.interaction.entity.Review;
 import com.apartment.website.interaction.service.ReviewService;
 import com.apartment.website.property.dto.PageResult;
@@ -19,145 +20,323 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * /properties      -> danh sách (lọc + phân trang)   -> views/property/list.jsp
- * /properties/{id} -> chi tiết                        -> views/property/detail.jsp
- * POST /properties/{id}/reviews -> gửi đánh giá (rating + comment), xong redirect về trang chi tiết
- * (thay cho PropertyWebController: @GetMapping("/properties") và @GetMapping("/properties/{id}"))
+ * Điều hướng bằng tham số action:
+ *  GET  /properties                          -> danh sách (lọc + phân trang)  -> views/property/list.jsp
+ *  GET  /properties?action=detail&id=3       -> chi tiết căn id 3              -> views/property/detail.jsp
+ *  POST /properties  (action=review, id=3)   -> gửi đánh giá, xong redirect về trang chi tiết
  */
-@WebServlet("/properties/*")
+@WebServlet("/properties")
 public class PropertyServlet extends HttpServlet {
-    private static final List<String> REVIEW_FIELDS = List.of("name", "email", "rating", "comment");
-    private PropertyService service;
-    private ReviewService reviews;
+    private static final String[] REVIEW_FIELDS = {"name", "email", "rating", "comment"};
+
+    private PropertyService propertyService;
+    private ReviewService reviewService;
 
     @Override
     public void init() {
-        service = (PropertyService) getServletContext().getAttribute(AppContextListener.PROPERTY_SERVICE);
-        reviews = (ReviewService) getServletContext().getAttribute(AppContextListener.REVIEW_SERVICE);
+        propertyService = (PropertyService) getServletContext().getAttribute(AppContextListener.PROPERTY_SERVICE);
+        reviewService = (ReviewService) getServletContext().getAttribute(AppContextListener.REVIEW_SERVICE);
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-            String path = req.getPathInfo();                       // null hoặc "/" = danh sách, "/3" = chi tiết căn id 3
-        if (path == null || path.equals("/")) showList(req, resp);
-        else showDetail(req, resp, path.substring(1));
-    }
-
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo();                       // "/3/reviews"
-        if (path == null || !path.matches("/\\d{1,18}/reviews")) { resp.sendError(HttpServletResponse.SC_NOT_FOUND); return; }
-        String idText = path.substring(1, path.indexOf("/reviews"));
-        long id = Long.parseLong(idText);
-        if (service.findById(id).isEmpty()) { resp.sendError(HttpServletResponse.SC_NOT_FOUND); return; }
-        try {
-            boolean created = reviews.submit(id, req.getParameter("name"), req.getParameter("email"),
-                    req.getParameter("rating"), req.getParameter("comment"));
-            // redirect (PRG) để F5 không gửi lại form; #reviews cuộn thẳng xuống phần đánh giá
-            resp.sendRedirect(req.getContextPath() + "/properties/" + id + "?review=" + (created ? "created" : "updated") + "#reviews");
-            return;
-        } catch (ReviewException e) {
-            req.setAttribute("reviewError", e.getMessage());
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if (action == null || action.isEmpty() || action.equals("list")) {
+            showList(request, response);
+        } else if (action.equals("detail")) {
+            showDetail(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
-        Map<String, String> form = new HashMap<>();            // giữ lại những gì người dùng đã nhập
-        for (String f : REVIEW_FIELDS) form.put(f, text(req, f));
-        req.setAttribute("reviewForm", form);
-        showDetail(req, resp, idText);
     }
 
-    private void showList(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String keyword = text(req, "keyword"), district = text(req, "district"), price = text(req, "price");
-        String type = "RENT".equalsIgnoreCase(text(req, "type")) ? "RENT" : "SALE";
-        Integer bedrooms = toInt(req.getParameter("bedrooms"));
-        int page = Math.max(1, Optional.ofNullable(toInt(req.getParameter("page"))).orElse(1));
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        if ("review".equals(action)) {
+            submitReview(request, response);
+        } else {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+
+    // ===================== action=list =====================
+
+    private void showList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 1. Đọc các ô lọc trên URL
+        String keyword = getText(request, "keyword");
+        String district = getText(request, "district");
+        String price = getText(request, "price");
+        String type = "SALE";
+        if ("RENT".equalsIgnoreCase(getText(request, "type"))) {
+            type = "RENT";
+        }
+        Integer bedrooms = toInt(request.getParameter("bedrooms"));
+        Integer pageParam = toInt(request.getParameter("page"));
+        int page = 1;
+        if (pageParam != null && pageParam > 1) {
+            page = pageParam;
+        }
+
+        // 2. Gọi Service lấy 1 trang kết quả
         PropertyFilter filter = new PropertyFilter(keyword, district, bedrooms, price, type);
-        PageResult<Property> result = service.search(filter, page);
-        if (page > result.getTotalPages()) {                   // gõ page quá lớn -> lùi về trang cuối
+        PageResult<Property> result = propertyService.search(filter, page);
+        // gõ page quá lớn -> lùi về trang cuối
+        if (page > result.getTotalPages()) {
             page = result.getTotalPages();
-            result = service.search(filter, page);
+            result = propertyService.search(filter, page);
         }
 
-        List<Map<String, Object>> districts = new ArrayList<>();
-        for (String d : service.districts()) districts.add(Map.of("value", d, "selected", d.equals(district) ? "selected" : ""));
+        // 3. Danh sách quận cho ô chọn, đánh dấu quận đang chọn
+        List<Map<String, Object>> districts = new ArrayList<Map<String, Object>>();
+        List<String> districtNames = propertyService.districts();
+        for (int i = 0; i < districtNames.size(); i++) {
+            String name = districtNames.get(i);
+            Map<String, Object> option = new HashMap<String, Object>();
+            option.put("value", name);
+            if (name.equals(district)) {
+                option.put("selected", "selected");
+            } else {
+                option.put("selected", "");
+            }
+            districts.add(option);
+        }
 
-        String base = req.getContextPath() + "/properties?keyword=" + enc(keyword) + "&district=" + enc(district)
-                + "&price=" + enc(price) + "&type=" + type + "&bedrooms=" + (bedrooms == null ? "" : bedrooms) + "&page=";
-        long from = result.getTotal() == 0 ? 0 : (long) (page - 1) * result.getSize() + 1;   // "hiển thị from–to"
-        long to = Math.min((long) page * result.getSize(), result.getTotal());
+        // 4. Link phân trang giữ nguyên bộ lọc, chỉ đổi số trang ở cuối
+        String bedroomsText = "";
+        if (bedrooms != null) {
+            bedroomsText = String.valueOf(bedrooms);
+        }
+        String baseUrl = request.getContextPath() + "/properties?action=list"
+                + "&keyword=" + encode(keyword)
+                + "&district=" + encode(district)
+                + "&price=" + encode(price)
+                + "&type=" + type
+                + "&bedrooms=" + bedroomsText
+                + "&page=";
 
-        req.setAttribute("active", "list");
-        req.setAttribute("type", type);
-        req.setAttribute("properties", result.getItems());
-        req.setAttribute("total", result.getTotal());
-        req.setAttribute("noResult", result.getItems().isEmpty());
-        req.setAttribute("districts", districts);
-        req.setAttribute("from", from);
-        req.setAttribute("to", to);
-        req.setAttribute("totalPages", result.getTotalPages());
-        req.setAttribute("pages", pageLinks(base, page, result.getTotalPages()));
-        View.forward(req, resp, "property/list");
+        // "Hiển thị from–to trong tổng số total căn"
+        long from = 0;
+        if (result.getTotal() > 0) {
+            from = (long) (page - 1) * result.getSize() + 1;
+        }
+        long to = (long) page * result.getSize();
+        if (to > result.getTotal()) {
+            to = result.getTotal();
+        }
+
+        // 5. Gửi dữ liệu sang JSP
+        request.setAttribute("active", "list");
+        request.setAttribute("type", type);
+        request.setAttribute("properties", result.getItems());
+        request.setAttribute("total", result.getTotal());
+        request.setAttribute("noResult", result.getItems().isEmpty());
+        request.setAttribute("districts", districts);
+        request.setAttribute("from", from);
+        request.setAttribute("to", to);
+        request.setAttribute("totalPages", result.getTotalPages());
+        request.setAttribute("pages", buildPageLinks(baseUrl, page, result.getTotalPages()));
+        View.forward(request, response, "property/list");
     }
 
     /** « 1 2 3 … 10 »: luôn có trang đầu, trang cuối và 2 trang quanh trang hiện tại. href = null nghĩa là không bấm được. */
-    private static List<Map<String, Object>> pageLinks(String base, int current, int total) {
-        List<Map<String, Object>> out = new ArrayList<>();
-        out.add(link("«", current > 1 ? base + (current - 1) : null, false));
-        int last = 0;
-        for (int i = 1; i <= total; i++) {
-            if (i != 1 && i != total && Math.abs(i - current) > 2) continue;
-            if (i - last > 1) out.add(link("…", null, false));
-            out.add(link(String.valueOf(i), base + i, i == current));
-            last = i;
+    private static List<Map<String, Object>> buildPageLinks(String baseUrl, int current, int total) {
+        List<Map<String, Object>> links = new ArrayList<Map<String, Object>>();
+
+        String previousHref = null;
+        if (current > 1) {
+            previousHref = baseUrl + (current - 1);
         }
-        out.add(link("»", current < total ? base + (current + 1) : null, false));
-        return out;
+        links.add(createLink("«", previousHref, false));
+
+        int lastShown = 0;
+        for (int i = 1; i <= total; i++) {
+            boolean isFirstOrLast = (i == 1 || i == total);
+            boolean nearCurrent = Math.abs(i - current) <= 2;
+            if (!isFirstOrLast && !nearCurrent) {
+                continue;
+            }
+            // có khoảng trống giữa 2 số trang -> chèn dấu …
+            if (i - lastShown > 1) {
+                links.add(createLink("…", null, false));
+            }
+            links.add(createLink(String.valueOf(i), baseUrl + i, i == current));
+            lastShown = i;
+        }
+
+        String nextHref = null;
+        if (current < total) {
+            nextHref = baseUrl + (current + 1);
+        }
+        links.add(createLink("»", nextHref, false));
+        return links;
     }
 
-    private static Map<String, Object> link(String label, String href, boolean active) {
-        Map<String, Object> m = new HashMap<>();      // HashMap vì href có thể là null (Map.of không cho null)
-        m.put("label", label);
-        m.put("href", href);
-        m.put("active", active);
-        return m;
+    private static Map<String, Object> createLink(String label, String href, boolean active) {
+        Map<String, Object> link = new HashMap<String, Object>();
+        link.put("label", label);
+        link.put("href", href);
+        link.put("active", active);
+        return link;
     }
 
-    private void showDetail(HttpServletRequest req, HttpServletResponse resp, String idText) throws ServletException, IOException {
-        Optional<Property> found = Optional.empty();
-        try { found = service.findById(Long.parseLong(idText)); } catch (NumberFormatException ignored) {}
-        if (found.isEmpty()) { resp.sendError(HttpServletResponse.SC_NOT_FOUND); return; }   // web.xml sẽ hiện 404.jsp
-        Property p = found.get();
+    // ===================== action=detail =====================
 
-        List<String> urls = p.getImageUrls().isEmpty() ? List.of(Property.NO_IMAGE) : p.getImageUrls();
-        int sel = Math.min(Math.max(Optional.ofNullable(toInt(req.getParameter("img"))).orElse(0), 0), urls.size() - 1);
-        List<Map<String, Object>> thumbs = new ArrayList<>();
-        for (int i = 0; i < urls.size(); i++)
-            thumbs.add(Map.of("url", urls.get(i), "href", req.getContextPath() + "/properties/" + p.getPropertyId() + "?img=" + i,
-                    "active", i == sel ? "is-active" : ""));
+    private void showDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 1. Lấy id trên URL rồi tìm căn
+        Long id = toLong(request.getParameter("id"));
+        if (id == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+        Property property = propertyService.findById(id);
+        if (property == null) {
+            // web.xml sẽ hiện 404.jsp
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
-        req.setAttribute("active", "list");
-        req.setAttribute("property", p);
-        req.setAttribute("mainImage", urls.get(sel));
-        req.setAttribute("images", thumbs);
-        List<Property> same = service.sameDistrict(p);
-        req.setAttribute("sameDistrict", same);
-        req.setAttribute("otherDistrict", service.otherDistrict(p, same.size()));
+        // 2. Ảnh: ảnh lớn là ảnh thứ ?img=..., các ảnh nhỏ là link đổi ?img
+        List<String> imageUrls = property.getImageUrls();
+        if (imageUrls.isEmpty()) {
+            imageUrls = new ArrayList<String>();
+            imageUrls.add(Property.NO_IMAGE);
+        }
+        int selected = 0;
+        Integer imgParam = toInt(request.getParameter("img"));
+        if (imgParam != null && imgParam > 0 && imgParam < imageUrls.size()) {
+            selected = imgParam;
+        }
+        List<Map<String, Object>> thumbs = new ArrayList<Map<String, Object>>();
+        for (int i = 0; i < imageUrls.size(); i++) {
+            Map<String, Object> thumb = new HashMap<String, Object>();
+            thumb.put("url", imageUrls.get(i));
+            thumb.put("href", request.getContextPath() + "/properties?action=detail&id=" + property.getPropertyId() + "&img=" + i);
+            if (i == selected) {
+                thumb.put("active", "is-active");
+            } else {
+                thumb.put("active", "");
+            }
+            thumbs.add(thumb);
+        }
 
-        Optional<Owner> owner = service.ownerOf(p.getPropertyId());
-        req.setAttribute("owner", owner.orElse(null));
-        req.setAttribute("ownerListings", owner.map(o -> service.activeListingCount(o.getOwnerId())).orElse(0));
+        // 3. Căn tương tự: cùng quận và khu vực khác
+        List<Property> sameDistrict = propertyService.sameDistrict(property);
+        List<Property> otherDistrict = propertyService.otherDistrict(property, sameDistrict.size());
 
-        List<Review> list = reviews.reviews(p.getPropertyId());
-        req.setAttribute("reviews", list);
-        req.setAttribute("reviewSummary", reviews.summary(list));
-        req.setAttribute("reviewStatus", text(req, "review"));     // "created" | "updated" sau khi gửi thành công
-        if (req.getAttribute("reviewForm") == null) req.setAttribute("reviewForm", Map.of("rating", "5"));
-        View.forward(req, resp, "property/detail");
+        // 4. Chủ sở hữu (có thể chưa có)
+        Owner owner = propertyService.ownerOf(property.getPropertyId());
+        int ownerListings = 0;
+        if (owner != null) {
+            ownerListings = propertyService.activeListingCount(owner.getOwnerId());
+        }
+
+        // 5. Đánh giá
+        List<Review> reviews = reviewService.reviews(property.getPropertyId());
+        ReviewSummary reviewSummary = reviewService.summary(reviews);
+        // form đánh giá: lần đầu mở trang thì mặc định chọn 5 sao
+        if (request.getAttribute("reviewForm") == null) {
+            Map<String, String> defaultForm = new HashMap<String, String>();
+            defaultForm.put("rating", "5");
+            request.setAttribute("reviewForm", defaultForm);
+        }
+
+        // 6. Gửi dữ liệu sang JSP
+        request.setAttribute("active", "list");
+        request.setAttribute("property", property);
+        request.setAttribute("mainImage", imageUrls.get(selected));
+        request.setAttribute("images", thumbs);
+        request.setAttribute("sameDistrict", sameDistrict);
+        request.setAttribute("otherDistrict", otherDistrict);
+        request.setAttribute("owner", owner);
+        request.setAttribute("ownerListings", ownerListings);
+        request.setAttribute("reviews", reviews);
+        request.setAttribute("reviewSummary", reviewSummary);
+        // "created" | "updated" sau khi gửi đánh giá thành công
+        request.setAttribute("reviewStatus", getText(request, "review"));
+        View.forward(request, response, "property/detail");
     }
 
-    private static String text(HttpServletRequest req, String name) { String v = req.getParameter(name); return v == null ? "" : v; }
-    private static Integer toInt(String s) { try { return Integer.parseInt(s.trim()); } catch (Exception e) { return null; } }
-    private static String enc(String s) { return URLEncoder.encode(s, StandardCharsets.UTF_8); }
+    // ===================== action=review (POST) =====================
+
+    private void submitReview(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Long id = toLong(request.getParameter("id"));
+        if (id == null || propertyService.findById(id) == null) {
+            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+
+        String name = request.getParameter("name");
+        String email = request.getParameter("email");
+        String rating = request.getParameter("rating");
+        String comment = request.getParameter("comment");
+
+        try {
+            boolean created = reviewService.submit(id, name, email, rating, comment);
+            String status;
+            if (created) {
+                status = "created";
+            } else {
+                status = "updated";
+            }
+            // redirect (Post/Redirect/Get) để F5 không gửi lại form; #reviews cuộn thẳng xuống phần đánh giá
+            response.sendRedirect(request.getContextPath() + "/properties?action=detail&id=" + id
+                    + "&review=" + status + "#reviews");
+            return;
+        } catch (ReviewException e) {
+            request.setAttribute("reviewError", e.getMessage());
+        }
+
+        // Dữ liệu sai -> hiện lại trang chi tiết, giữ lại những gì người dùng đã nhập
+        Map<String, String> form = new HashMap<String, String>();
+        for (int i = 0; i < REVIEW_FIELDS.length; i++) {
+            String field = REVIEW_FIELDS[i];
+            form.put(field, getText(request, field));
+        }
+        request.setAttribute("reviewForm", form);
+        showDetail(request, response);
+    }
+
+    // ===================== hàm phụ =====================
+
+    /** Tham số không có thì trả về chuỗi rỗng thay vì null. */
+    private static String getText(HttpServletRequest request, String name) {
+        String value = request.getParameter(name);
+        if (value == null) {
+            return "";
+        }
+        return value;
+    }
+
+    private static Integer toInt(String text) {
+        if (text == null) {
+            return null;
+        }
+        try {
+            return Integer.parseInt(text.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static Long toLong(String text) {
+        if (text == null) {
+            return null;
+        }
+        try {
+            return Long.parseLong(text.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static String encode(String text) {
+        return URLEncoder.encode(text, StandardCharsets.UTF_8);
+    }
 }

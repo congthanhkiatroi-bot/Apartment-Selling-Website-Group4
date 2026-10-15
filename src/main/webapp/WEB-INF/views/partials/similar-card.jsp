@@ -1,7 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%-- 1 thẻ căn hộ ở mục "Căn hộ tương tự" (detail.jsp). Trang gọi phải đặt sẵn request attribute "card" = 1 Property. --%>
-<a class="similar-card" href="${ctx}/properties/<c:out value="${card.propertyId}"/>">
+<a class="similar-card" href="${ctx}/properties?action=detail&id=<c:out value="${card.propertyId}"/>">
   <img class="similar-card__img" src="<c:url value='${card.thumbnailUrl}'/>" alt="<c:out value="${card.title}"/>">
   <div class="similar-card__body">
     <div class="similar-card__top">

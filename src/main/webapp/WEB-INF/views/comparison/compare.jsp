@@ -35,7 +35,7 @@
             <div class="cmpx-head">
               <img src="<c:url value='${it.thumbnailUrl}'/>" alt="<c:out value="${it.title}"/>">
               <div>
-                <a href="${ctx}/properties/<c:out value="${it.propertyId}"/>"><c:out value="${it.title}"/></a>
+                <a href="${ctx}/properties?action=detail&id=<c:out value="${it.propertyId}"/>"><c:out value="${it.title}"/></a>
                 <small><c:out value="${it.rent ? 'Cho thuê' : 'Bán'}"/> · <c:out value="${it.buildingName}"/></small>
               </div>
               <form method="post" action="${ctx}/comparisons" style="margin:0">
@@ -95,7 +95,7 @@
       <tr><th class="cmpx-label"></th>
         <c:forEach var="it" items="${items}"><td><div class="cmpx-actions">
           <a class="btn btn--primary" href="${ctx}/appointments">Đặt lịch xem</a>
-          <a class="btn btn--outline" href="${ctx}/properties/<c:out value="${it.propertyId}"/>">Xem chi tiết</a>
+          <a class="btn btn--outline" href="${ctx}/properties?action=detail&id=<c:out value="${it.propertyId}"/>">Xem chi tiết</a>
         </div></td></c:forEach>
         <c:forEach var="n" items="${emptySlots}"><td></td></c:forEach></tr>
     </table>

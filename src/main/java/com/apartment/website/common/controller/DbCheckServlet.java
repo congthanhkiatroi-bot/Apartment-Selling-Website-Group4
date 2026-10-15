@@ -9,48 +9,69 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /** TẠM THỜI - mở /db-check để kiểm tra kết nối PostgreSQL. Kiểm tra xong thì XÓA file này. */
 @WebServlet("/db-check")
 public class DbCheckServlet extends HttpServlet {
-    private static final String[] TABLES = {"users", "customers", "owners", "buildings", "apartments", "properties",
+    private static final String[] TABLES = {
+            "users", "customers", "owners", "buildings", "apartments", "properties",
             "customer_locations", "property_images", "listings", "favorites", "transactions", "reviews",
-            "property_viewings", "rental_apartments", "rental_apartment_images"};
+            "property_viewings", "rental_apartments", "rental_apartment_images"
+    };
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        resp.setContentType("text/plain;charset=UTF-8");
-        PrintWriter out = resp.getWriter();
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.setContentType("text/plain;charset=UTF-8");
+        PrintWriter out = response.getWriter();
         out.println("db.url    = " + Database.get("db.url", "(chua cau hinh)"));
         out.println("db.user   = " + Database.get("db.user", ""));
         out.println();
-        try (Connection c = Database.getConnection()) {
-            out.println("KET NOI THANH CONG: " + c.getMetaData().getDatabaseProductName()
-                    + " " + c.getMetaData().getDatabaseProductVersion());
+
+        try (Connection connection = Database.getConnection()) {
+            String productName = connection.getMetaData().getDatabaseProductName();
+            String productVersion = connection.getMetaData().getDatabaseProductVersion();
+            out.println("KET NOI THANH CONG: " + productName + " " + productVersion);
             out.println();
-            for (String t : TABLES) {
-                try (Statement st = c.createStatement(); ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM " + t)) {
-                    rs.next();
-                    out.printf("%-18s %d dong%n", t, rs.getLong(1));
+
+            for (int i = 0; i < TABLES.length; i++) {
+                String table = TABLES[i];
+                // tên bảng lấy từ mảng hằng ở trên (không phải dữ liệu người dùng) nên ghép chuỗi được
+                String sql = "SELECT COUNT(*) FROM " + table;
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    try (ResultSet rs = statement.executeQuery()) {
+                        if (rs.next()) {
+                            out.printf("%-18s %d dong%n", table, rs.getLong(1));
+                        }
+                    }
                 } catch (SQLException e) {
-                    out.printf("%-18s LOI: %s%n", t, e.getMessage());
+                    out.printf("%-18s LOI: %s%n", table, e.getMessage());
                 }
             }
-            try (Statement st = c.createStatement();
-                 ResultSet rs = st.executeQuery("SELECT COUNT(*) FILTER (WHERE listing_type = 'SALE'), COUNT(*) FILTER (WHERE listing_type = 'RENT') "
-                         + "FROM properties WHERE status = 'AVAILABLE'")) {
-                rs.next();
-                out.println();
-                out.println("Can ho BAN AVAILABLE (tab mac dinh): " + rs.getLong(1));
-                out.println("Can ho THUE AVAILABLE (?type=RENT): " + rs.getLong(2));
-            } catch (SQLException ignored) { }
+
+            String countSql = "SELECT COUNT(*) FILTER (WHERE listing_type = 'SALE'), "
+                    + "COUNT(*) FILTER (WHERE listing_type = 'RENT') "
+                    + "FROM properties "
+                    + "WHERE status = 'AVAILABLE'";
+            try (PreparedStatement statement = connection.prepareStatement(countSql)) {
+                try (ResultSet rs = statement.executeQuery()) {
+                    if (rs.next()) {
+                        out.println();
+                        out.println("Can ho BAN AVAILABLE (tab mac dinh): " + rs.getLong(1));
+                        out.println("Can ho THUE AVAILABLE (?type=RENT): " + rs.getLong(2));
+                    }
+                }
+            } catch (SQLException ignored) {
+                // bảng properties chưa có cột listing_type -> bỏ qua phần này
+            }
         } catch (SQLException e) {
             out.println("KET NOI THAT BAI: " + e.getMessage());
             Throwable cause = e.getCause();
-            if (cause != null) out.println("Nguyen nhan: " + cause);
+            if (cause != null) {
+                out.println("Nguyen nhan: " + cause);
+            }
         }
     }
 }

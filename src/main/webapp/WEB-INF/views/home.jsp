@@ -89,7 +89,7 @@
             <h3><c:out value="${it.title}"/></h3>
             <p class="property-location">📍 <c:out value="${it.address}"/>, <c:out value="${it.district}"/>, <c:out value="${it.city}"/></p>
             <div class="property-meta"><span>📐 <b><c:out value="${it.area}"/></b> m²</span><span>🛏 <b><c:out value="${it.bedrooms}"/></b> PN</span><span>🚿 <b><c:out value="${it.bathrooms}"/></b> WC</span></div>
-            <a href="${ctx}/properties/<c:out value="${it.propertyId}"/>" class="property-button">Xem chi tiết</a>
+            <a href="${ctx}/properties?action=detail&id=<c:out value="${it.propertyId}"/>" class="property-button">Xem chi tiết</a>
           </div>
         </article>
         </c:forEach>

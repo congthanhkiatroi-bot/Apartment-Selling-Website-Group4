@@ -11,5 +11,7 @@ public class Admin extends User {
         super(userId, username, email, passwordHash, ROLE_ADMIN, createdAt, active);
     }
 
-    public long getAdminId() { return getUserId(); }
+    public long getAdminId() {
+        return getUserId();
+    }
 }

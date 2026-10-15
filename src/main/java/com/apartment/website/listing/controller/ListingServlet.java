@@ -8,26 +8,36 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-/** /postings/create: GET hiện form đăng tin, POST nhận dữ liệu form (thay cho ListingWebController). */
+/** /postings/create: GET hiện form đăng tin, POST nhận dữ liệu form. */
 @WebServlet("/postings/create")
 public class ListingServlet extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setAttribute("active", "post");
-        View.forward(req, resp, "listing/post");
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        request.setAttribute("active", "post");
+        View.forward(request, response, "listing/post");
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // TODO (backend): gom req.getParameter("title"), ("price")... -> ListingService.create(...) -> lưu DB,
-        // rồi resp.sendRedirect(req.getContextPath() + "/properties") để tránh gửi lại form khi F5.
-        List<Map<String, Object>> fields = new ArrayList<>();
-        req.getParameterMap().forEach((name, values) -> fields.add(Map.of("name", name, "value", String.join(", ", values))));
-        req.setAttribute("active", "post");
-        req.setAttribute("fields", fields);
-        View.forward(req, resp, "listing/post-result");
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // TODO (backend): gom request.getParameter("title"), ("price")... -> ListingService.create(...) -> lưu DB,
+        // rồi response.sendRedirect(request.getContextPath() + "/properties") để tránh gửi lại form khi F5.
+        List<Map<String, Object>> fields = new ArrayList<Map<String, Object>>();
+        Map<String, String[]> parameters = request.getParameterMap();
+        for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
+            Map<String, Object> field = new HashMap<String, Object>();
+            field.put("name", entry.getKey());
+            field.put("value", String.join(", ", entry.getValue()));
+            fields.add(field);
+        }
+
+        request.setAttribute("active", "post");
+        request.setAttribute("fields", fields);
+        View.forward(request, response, "listing/post-result");
     }
 }
