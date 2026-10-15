@@ -6,6 +6,12 @@
     <display-name>Apartment Selling Website</display-name>
 
     <!-- Địa chỉ không tồn tại / sendError(404) -> hiện trang 404.jsp -->
+    <!-- Khách hàng vào trang của Chủ căn hộ (sendError 403) -> hiện trang 403.jsp -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/WEB-INF/views/error/403.jsp</location>
+    </error-page>
+
     <error-page>
         <error-code>404</error-code>
         <location>/WEB-INF/views/error/404.jsp</location>

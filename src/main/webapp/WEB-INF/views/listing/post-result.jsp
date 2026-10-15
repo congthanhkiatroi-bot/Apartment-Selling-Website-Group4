@@ -5,8 +5,8 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Đã nhận dữ liệu</title>
-  <link rel="stylesheet" href="${ctx}/css/base.css">
-  <link rel="stylesheet" href="${ctx}/css/layout.css">
+  <link rel="stylesheet" href="${ctx}/css/base.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/layout.css?v=6">
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/partials/header.jsp"/>
@@ -16,7 +16,7 @@
   <ul style="margin:16px 0 24px;line-height:1.9">
     <c:forEach var="it" items="${fields}"><li><b><c:out value="${it.name}"/></b>: <c:out value="${it.value}"/></li></c:forEach>
   </ul>
-  <a class="btn btn--primary" href="${ctx}/postings/create">Quay lại form</a>
+  <a class="btn btn--primary" href="${ctx}/postings?action=create">Quay lại form</a>
 </main>
 <jsp:include page="/WEB-INF/views/partials/footer.jsp"/>
 </body>

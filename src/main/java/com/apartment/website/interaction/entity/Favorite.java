@@ -2,27 +2,45 @@ package com.apartment.website.interaction.entity;
 
 import java.time.LocalDateTime;
 
-/** Căn hộ khách đã lưu yêu thích (bảng favorites, khóa chính = customer_id + property_id). */
+/** Căn hộ người dùng đã lưu yêu thích (bảng favorites, UNIQUE user_id + property_id). */
 public class Favorite {
-    private final long customerId;
-    private final long propertyId;
-    private final LocalDateTime createdAt;
+    private long favoriteId;
+    private long userId;
+    private long propertyId;
+    private LocalDateTime createdAt;
 
-    public Favorite(long customerId, long propertyId, LocalDateTime createdAt) {
-        this.customerId = customerId;
-        this.propertyId = propertyId;
-        this.createdAt = createdAt;
+    public Favorite() {
     }
 
-    public long getCustomerId() {
-        return customerId;
+    public long getFavoriteId() {
+        return favoriteId;
+    }
+
+    public void setFavoriteId(long favoriteId) {
+        this.favoriteId = favoriteId;
+    }
+
+    public long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
     }
 
     public long getPropertyId() {
         return propertyId;
     }
 
+    public void setPropertyId(long propertyId) {
+        this.propertyId = propertyId;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

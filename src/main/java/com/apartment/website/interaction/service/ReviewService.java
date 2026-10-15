@@ -4,17 +4,13 @@ import com.apartment.website.common.exception.ReviewException;
 import com.apartment.website.interaction.dto.ReviewSummary;
 import com.apartment.website.interaction.entity.Review;
 import com.apartment.website.interaction.repository.ReviewRepository;
+import com.apartment.website.user.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Quy tắc đánh giá: kiểm tra dữ liệu form, tính điểm trung bình. writeReview() / update() trong diagram nằm ở đây. */
 public class ReviewService {
-    private static final String EMAIL_PATTERN = "^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$";
-    // users.username tối đa 50, chừa chỗ cho hậu tố " 2", " 3"...
-    private static final int MAX_NAME = 40;
-    private static final int MAX_EMAIL = 100;
-
     private final ReviewRepository repository;
 
     public ReviewService(ReviewRepository repository) {
@@ -53,17 +49,16 @@ public class ReviewService {
         return new ReviewSummary(average, total, rows);
     }
 
-    /** Gửi đánh giá. Trả về true nếu là đánh giá mới, false nếu khách (cùng email) sửa lại đánh giá cũ. */
-    public boolean submit(long propertyId, String name, String email, String ratingText, String comment) {
-        // 1. Chuẩn hóa dữ liệu: null -> "", bỏ khoảng trắng thừa
-        if (name == null) {
-            name = "";
+    /**
+     * Khách đang đăng nhập gửi đánh giá. Trả về true nếu là đánh giá mới, false nếu sửa lại đánh giá cũ.
+     * DB chỉ cho tài khoản CUSTOMER viết đánh giá (trigger trg_check_review_customer).
+     */
+    public boolean submit(long propertyId, User customer, String ratingText, String comment) {
+        if (customer == null || !customer.isCustomer()) {
+            throw new ReviewException("Chỉ tài khoản khách hàng mới gửi được đánh giá.");
         }
-        name = name.trim().replaceAll("\\s+", " ");
-        if (email == null) {
-            email = "";
-        }
-        email = email.trim();
+
+        // 1. Chuẩn hóa dữ liệu
         if (comment == null) {
             comment = "";
         }
@@ -79,15 +74,6 @@ public class ReviewService {
         if (rating < Review.MIN_RATING || rating > Review.MAX_RATING) {
             throw new ReviewException("Vui lòng chọn số sao từ 1 đến 5.");
         }
-        if (name.isEmpty()) {
-            throw new ReviewException("Vui lòng nhập họ tên.");
-        }
-        if (name.length() > MAX_NAME) {
-            throw new ReviewException("Họ tên tối đa " + MAX_NAME + " ký tự.");
-        }
-        if (!email.matches(EMAIL_PATTERN) || email.length() > MAX_EMAIL) {
-            throw new ReviewException("Email không hợp lệ.");
-        }
         if (comment.isEmpty()) {
             throw new ReviewException("Vui lòng nhập nhận xét.");
         }
@@ -96,7 +82,6 @@ public class ReviewService {
         }
 
         // 3. Lưu xuống DB
-        long customerId = repository.findOrCreateCustomer(name, email);
-        return repository.save(customerId, propertyId, rating, comment);
+        return repository.save(customer.getUserId(), propertyId, rating, comment);
     }
 }

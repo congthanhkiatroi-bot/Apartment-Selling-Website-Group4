@@ -1,6 +1,7 @@
 package com.apartment.website.property.controller;
 
 import com.apartment.website.common.exception.ReviewException;
+import com.apartment.website.common.filter.AuthFilter;
 import com.apartment.website.common.util.View;
 import com.apartment.website.config.AppContextListener;
 import com.apartment.website.interaction.dto.ReviewSummary;
@@ -11,6 +12,7 @@ import com.apartment.website.property.dto.PropertyFilter;
 import com.apartment.website.property.entity.Property;
 import com.apartment.website.property.service.PropertyService;
 import com.apartment.website.user.entity.Owner;
+import com.apartment.website.user.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -29,11 +31,11 @@ import java.util.Map;
  * Điều hướng bằng tham số action:
  *  GET  /properties                          -> danh sách (lọc + phân trang)  -> views/property/list.jsp
  *  GET  /properties?action=detail&id=3       -> chi tiết căn id 3              -> views/property/detail.jsp
- *  POST /properties  (action=review, id=3)   -> gửi đánh giá, xong redirect về trang chi tiết
+ *  POST /properties  (action=review, id=3)   -> khách hàng đã đăng nhập gửi đánh giá, xong redirect về trang chi tiết
  */
 @WebServlet("/properties")
 public class PropertyServlet extends HttpServlet {
-    private static final String[] REVIEW_FIELDS = {"name", "email", "rating", "comment"};
+    private static final String[] REVIEW_FIELDS = {"rating", "comment"};
 
     private PropertyService propertyService;
     private ReviewService reviewService;
@@ -272,13 +274,19 @@ public class PropertyServlet extends HttpServlet {
             return;
         }
 
-        String name = request.getParameter("name");
-        String email = request.getParameter("email");
+        // chưa đăng nhập -> đăng nhập xong quay lại trang chi tiết căn này
+        User user = AuthFilter.getLoginUser(request);
+        if (user == null) {
+            String next = "/properties?action=detail&id=" + id;
+            response.sendRedirect(request.getContextPath() + "/auth?action=login&next=" + encode(next));
+            return;
+        }
+
         String rating = request.getParameter("rating");
         String comment = request.getParameter("comment");
 
         try {
-            boolean created = reviewService.submit(id, name, email, rating, comment);
+            boolean created = reviewService.submit(id, user, rating, comment);
             String status;
             if (created) {
                 status = "created";

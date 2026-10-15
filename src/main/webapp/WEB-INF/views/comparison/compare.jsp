@@ -5,9 +5,9 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>So sánh căn hộ</title>
-  <link rel="stylesheet" href="${ctx}/css/base.css">
-  <link rel="stylesheet" href="${ctx}/css/layout.css">
-  <link rel="stylesheet" href="${ctx}/css/compare.css">
+  <link rel="stylesheet" href="${ctx}/css/base.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/layout.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/compare.css?v=6">
 </head>
 <body id="top">
 <jsp:include page="/WEB-INF/views/partials/header.jsp"/>
@@ -94,7 +94,7 @@
 
       <tr><th class="cmpx-label"></th>
         <c:forEach var="it" items="${items}"><td><div class="cmpx-actions">
-          <a class="btn btn--primary" href="${ctx}/appointments">Đặt lịch xem</a>
+          <a class="btn btn--primary" href="${ctx}/appointments?propertyId=<c:out value="${it.propertyId}"/>">Đặt lịch xem</a>
           <a class="btn btn--outline" href="${ctx}/properties?action=detail&id=<c:out value="${it.propertyId}"/>">Xem chi tiết</a>
         </div></td></c:forEach>
         <c:forEach var="n" items="${emptySlots}"><td></td></c:forEach></tr>

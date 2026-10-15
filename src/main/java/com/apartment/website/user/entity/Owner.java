@@ -1,53 +1,37 @@
 package com.apartment.website.user.entity;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 /**
- * Chủ sở hữu / người đăng tin (bảng owners, owner_id = users.user_id) -> kế thừa User.
- * createListing() / manageListings() của diagram sẽ nằm ở ListingService.
+ * Chủ căn hộ (bảng owners, owner_id = users.user_id) -> kế thừa User.
+ * Số điện thoại nằm ở users.phone (lớp cha); owners chỉ có thêm tax_code và identity_verified.
+ * createListing() / manageListings() của diagram nằm ở ListingService.
  */
 public class Owner extends User {
-    private static final DateTimeFormatter MONTH_FORMAT = DateTimeFormatter.ofPattern("MM/yyyy");
+    private static final long serialVersionUID = 1L;
 
-    /** Cột owners.phone (số điện thoại chủ sở hữu). */
-    private final String phone;
+    private String taxCode;
+    private boolean identityVerified;
 
-    public Owner(long userId, String username, String email, String passwordHash, LocalDateTime createdAt,
-                 boolean active, String phone) {
-        super(userId, username, email, passwordHash, ROLE_OWNER, createdAt, active);
-        this.phone = phone;
+    public Owner() {
+        setRole(ROLE_OWNER);
     }
 
     public long getOwnerId() {
         return getUserId();
     }
 
-    public String getPhone() {
-        return phone;
+    public String getTaxCode() {
+        return taxCode;
     }
 
-    /** "0901234567" -> "0901 234 567" cho dễ đọc; số dạng khác thì giữ nguyên. */
-    public String getPhoneText() {
-        if (phone == null) {
-            return "";
-        }
-        if (phone.matches("0\\d{9}")) {
-            return phone.substring(0, 4) + " " + phone.substring(4, 7) + " " + phone.substring(7);
-        }
-        return phone;
+    public void setTaxCode(String taxCode) {
+        this.taxCode = taxCode;
     }
 
-    /** JSP: ${owner.initial} -> chữ cái đầu của tên, làm avatar. */
-    public String getInitial() {
-        return getUsername().substring(0, 1).toUpperCase();
+    public boolean isIdentityVerified() {
+        return identityVerified;
     }
 
-    /** JSP: ${owner.memberSince} -> "10/2026". */
-    public String getMemberSince() {
-        if (getCreatedAt() == null) {
-            return "";
-        }
-        return getCreatedAt().format(MONTH_FORMAT);
+    public void setIdentityVerified(boolean identityVerified) {
+        this.identityVerified = identityVerified;
     }
 }

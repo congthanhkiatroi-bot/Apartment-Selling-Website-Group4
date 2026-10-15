@@ -76,3 +76,7 @@ a.slot:hover{border-color:var(--green);background:var(--green-soft)}
   .appt-side{position:static}
   .slot-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+/* Khung mời đăng nhập / thông báo cho chủ căn hộ thay cho form đặt lịch */
+.appt-login{display:grid;gap:10px;padding:18px;border:1px dashed #b9dfc9;border-radius:12px;background:#f3fbf6}
+.appt-login p{margin:0}

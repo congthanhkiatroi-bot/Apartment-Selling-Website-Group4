@@ -5,9 +5,9 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Đăng tin bất động sản</title>
-  <link rel="stylesheet" href="${ctx}/css/base.css">
-  <link rel="stylesheet" href="${ctx}/css/layout.css">
-  <link rel="stylesheet" href="${ctx}/css/listing-post.css">
+  <link rel="stylesheet" href="${ctx}/css/base.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/layout.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/listing-post.css?v=6">
 </head>
 <body id="top">
 <jsp:include page="/WEB-INF/views/partials/header.jsp"/>
@@ -16,7 +16,8 @@
   <div class="post-card">
     <h1 class="page__title">Đăng tin Bất động sản</h1>
     
-    <form class="post-form" id="postForm" action="${ctx}/postings/create" method="post">
+    <form class="post-form" id="postForm" action="${ctx}/postings" method="post">
+      <input type="hidden" name="action" value="create">
 
       <section class="post-section post-section--basic">
         <h2 class="post-section__title">1. Thông tin cơ bản</h2>

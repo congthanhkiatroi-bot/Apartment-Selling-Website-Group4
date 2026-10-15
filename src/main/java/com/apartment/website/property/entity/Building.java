@@ -17,10 +17,11 @@ public class Building {
     private final String description;
     private final String status;
     private final LocalDateTime createdAt;
+    private final long apartmentsInDatabase;
 
     public Building(long buildingId, String buildingCode, String buildingName, String address, String ward,
                     String district, String city, int totalFloors, int totalApartments, Integer yearBuilt,
-                    String description, String status, LocalDateTime createdAt) {
+                    String description, String status, LocalDateTime createdAt, long apartmentsInDatabase) {
         this.buildingId = buildingId;
         this.buildingCode = buildingCode;
         this.buildingName = buildingName;
@@ -34,6 +35,7 @@ public class Building {
         this.description = description;
         this.status = status;
         this.createdAt = createdAt;
+        this.apartmentsInDatabase = apartmentsInDatabase;
     }
 
     public long getBuildingId() {
@@ -86,6 +88,11 @@ public class Building {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    /** Cột apartments_in_database: số căn của tòa đã có trong hệ thống. */
+    public long getApartmentsInDatabase() {
+        return apartmentsInDatabase;
     }
 
     /** getDetails() trong diagram. */

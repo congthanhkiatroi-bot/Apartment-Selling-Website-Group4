@@ -5,9 +5,9 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Đặt lịch xem căn hộ</title>
-  <link rel="stylesheet" href="${ctx}/css/base.css">
-  <link rel="stylesheet" href="${ctx}/css/layout.css">
-  <link rel="stylesheet" href="${ctx}/css/appointment.css">
+  <link rel="stylesheet" href="${ctx}/css/base.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/layout.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/appointment.css?v=6">
 </head>
 <body id="top">
 <jsp:include page="/WEB-INF/views/partials/header.jsp"/>
@@ -18,8 +18,9 @@
   <p class="appt-sub">Chọn thời gian phù hợp và để chúng tôi giúp bạn khám phá ngôi nhà tương lai.</p>
 
   <c:if test="${not empty booked}">
-    <div class="alert alert--ok">✓ <b>Đặt lịch thành công!</b> Mã lịch hẹn #<c:out value="${booked.id}"/> —
-      <c:out value="${booked.dateText}"/> lúc <c:out value="${booked.time}"/>. Nhân viên sẽ liên hệ để xác nhận.</div>
+    <div class="alert alert--ok">✓ <b>Đã gửi yêu cầu đặt lịch!</b> Mã lịch hẹn #<c:out value="${booked.id}"/> —
+      <c:out value="${booked.dateText}"/>, <c:out value="${booked.time}"/>. Trạng thái: <b><c:out value="${booked.status}"/></b>.
+      Bạn sẽ nhận thông báo ở 🔔 khi chủ căn hộ xác nhận. <a href="${ctx}/viewings#v${booked.id}"><u>Xem lịch hẹn của tôi</u></a></div>
   </c:if>
   <c:if test="${not empty error}">
     <div class="alert alert--err">⚠ <c:out value="${error}"/></div>
@@ -67,39 +68,49 @@
       </div>
 
       <hr class="appt-hr">
-      <form method="post" action="${ctx}/appointments">
-        <input type="hidden" name="propertyId" value="${property.propertyId}">
-        <input type="hidden" name="date" value="<c:out value='${selectedDate}'/>">
-        <input type="hidden" name="time" value="<c:out value='${selectedTime}'/>">
+      <c:choose>
+        <%-- 1. Khách hàng đã đăng nhập: hiện form đặt lịch --%>
+        <c:when test="${canBook}">
+          <form method="post" action="${ctx}/appointments">
+            <input type="hidden" name="propertyId" value="${property.propertyId}">
+            <input type="hidden" name="date" value="<c:out value='${selectedDate}'/>">
+            <input type="hidden" name="time" value="<c:out value='${selectedTime}'/>">
 
-        <div class="appt-step"><span class="appt-step__no">02</span>
-          <div><h2>Thông tin liên hệ</h2><p>Nhân viên tư vấn sẽ xác nhận lịch với bạn.</p></div></div>
+            <div class="appt-step"><span class="appt-step__no">02</span>
+              <div><h2>Thông tin liên hệ</h2><p>Lấy sẵn từ tài khoản của bạn, có thể sửa. Chủ căn hộ sẽ xác nhận lịch.</p></div></div>
 
-        <div class="field-row">
-          <div class="field"><label class="field__label" for="fullName">Họ và tên *</label>
-            <input class="input" id="fullName" name="fullName" maxlength="100" required placeholder="Nguyễn Văn A" value="<c:out value='${form.fullName}'/>"></div>
-          <div class="field"><label class="field__label" for="phone">Số điện thoại *</label>
-            <input class="input" id="phone" name="phone" maxlength="20" required placeholder="09xx xxx xxx" value="<c:out value='${form.phone}'/>"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label class="field__label" for="email">Email</label>
-            <input class="input" id="email" name="email" type="email" maxlength="100" placeholder="ban@email.com" value="<c:out value='${form.email}'/>"></div>
-          <div class="field"><label class="field__label" for="attendees">Số người tham gia</label>
-            <select class="input" id="attendees" name="attendees">
-              <option value="1" ${form.attendees == '1' ? 'selected' : ''}>1 người</option>
-              <option value="2" ${form.attendees == '2' ? 'selected' : ''}>2 người</option>
-              <option value="3" ${form.attendees == '3' ? 'selected' : ''}>3 người</option>
-              <option value="4" ${form.attendees == '4' ? 'selected' : ''}>4 người</option>
-              <option value="5" ${form.attendees == '5' ? 'selected' : ''}>5 người</option>
-            </select></div>
-        </div>
-        <div class="field"><label class="field__label" for="note">Ghi chú <small>(không bắt buộc)</small></label>
-          <textarea class="input textarea" id="note" name="note" maxlength="500" placeholder="Ví dụ: Tôi muốn tìm hiểu thêm về phí quản lý..."><c:out value="${form.note}"/></textarea></div>
+            <%-- name = tên cột trong property_viewings: customer_name, customer_phone, note --%>
+            <div class="field-row">
+              <div class="field"><label class="field__label" for="customerName">Họ và tên *</label>
+                <input class="input" id="customerName" name="customerName" maxlength="150" required placeholder="Nguyễn Văn A" value="<c:out value='${form.customerName}'/>"></div>
+              <div class="field"><label class="field__label" for="customerPhone">Số điện thoại *</label>
+                <input class="input" id="customerPhone" name="customerPhone" type="tel" maxlength="20" required placeholder="09xx xxx xxx" value="<c:out value='${form.customerPhone}'/>"></div>
+            </div>
+            <div class="field"><label class="field__label" for="note">Ghi chú <small>(không bắt buộc)</small></label>
+              <textarea class="input textarea" id="note" name="note" maxlength="1000" placeholder="Ví dụ: Tôi muốn tìm hiểu thêm về phí quản lý..."><c:out value="${form.note}"/></textarea></div>
 
-        <button class="btn btn--primary btn--block appt-submit" type="submit" ${empty selectedTime ? 'disabled' : ''}>Xác nhận lịch xem nhà</button>
-        <c:if test="${empty selectedTime}"><p class="appt-hint">Hãy chọn một khung giờ ở trên để tiếp tục.</p></c:if>
-        <p class="appt-privacy">Thông tin của bạn được bảo mật và chỉ dùng để xác nhận lịch hẹn.</p>
-      </form>
+            <button class="btn btn--primary btn--block appt-submit" type="submit" ${empty selectedTime ? 'disabled' : ''}>Gửi yêu cầu đặt lịch</button>
+            <c:if test="${empty selectedTime}"><p class="appt-hint">Hãy chọn một khung giờ ở trên để tiếp tục.</p></c:if>
+            <p class="appt-privacy">Lịch hẹn ở trạng thái "Chờ xác nhận" cho tới khi chủ căn hộ đồng ý.</p>
+          </form>
+        </c:when>
+        <%-- 2. Chủ căn hộ: không đặt lịch được (DB chỉ cho customer_id là tài khoản CUSTOMER) --%>
+        <c:when test="${isOwnerViewer}">
+          <div class="appt-login">
+            <p>Bạn đang đăng nhập bằng tài khoản <b>Chủ căn hộ</b>. Chỉ tài khoản khách hàng mới đặt được lịch xem nhà.</p>
+            <a class="btn btn--outline" href="${ctx}/viewings">Xem lịch hẹn của các căn của bạn</a>
+          </div>
+        </c:when>
+        <%-- 3. Chưa đăng nhập: mời đăng nhập, xong quay lại đúng trang này --%>
+        <c:otherwise>
+          <div class="appt-login">
+            <p>Vui lòng <b>đăng nhập bằng tài khoản khách hàng</b> để đặt lịch xem căn hộ này.</p>
+            <a class="btn btn--primary" href="<c:out value='${loginUrl}'/>">Đăng nhập để đặt lịch</a>
+            <c:url var="registerUrl" value="/auth"><c:param name="action" value="register"/><c:param name="next" value="/appointments?propertyId=${property.propertyId}"/></c:url>
+            <a class="btn btn--outline" href="${registerUrl}">Tạo tài khoản khách hàng</a>
+          </div>
+        </c:otherwise>
+      </c:choose>
     </section>
 
     <aside class="appt-side">
@@ -108,21 +119,23 @@
           <span class="appt-prop__badge">Căn hộ nổi bật</span></div>
         <h3 class="appt-prop__title"><c:out value="${property.title}"/></h3>
         <p class="appt-prop__loc">📍 <c:out value="${property.district}"/>, <c:out value="${property.city}"/></p>
-        <p class="appt-prop__price"><c:out value="${property.priceText}"/> <small>Giá bán</small></p>
+        <p class="appt-prop__price"><c:out value="${property.priceText}"/> <small>${property.rent ? 'Giá thuê' : 'Giá bán'}</small></p>
         <div class="appt-prop__specs">
           <div><b>${property.bedrooms}</b><small>Phòng ngủ</small></div>
           <div><b>${property.bathrooms}</b><small>Phòng tắm</small></div>
           <div><b><c:out value="${property.area}"/> m²</b><small>Diện tích</small></div>
         </div>
-        <div class="appt-agent"><span class="appt-agent__avatar">ML</span>
-          <div><b>Minh Linh</b><small>Chuyên viên tư vấn bất động sản</small></div></div>
+        <c:if test="${not empty ownerAccount}">
+          <div class="appt-agent"><span class="appt-agent__avatar"><c:out value="${ownerAccount.initial}"/></span>
+            <div><b><c:out value="${ownerAccount.fullName}"/></b><small>Chủ căn hộ · sẽ xác nhận lịch hẹn</small></div></div>
+        </c:if>
         <div class="appt-summary">
           <h4>Tóm tắt lịch hẹn</h4>
           <p><span>Ngày xem</span><b><c:out value="${dateText}"/></b></p>
           <p><span>Giờ xem</span><b><c:out value="${timeText}"/></b></p>
           <p><span>Thời lượng</span><b>Khoảng 30 phút</b></p>
         </div>
-        <p class="appt-perks">✓ Miễn phí tham quan · Không bắt buộc đặt cọc · Nhân viên sẽ liên hệ xác nhận.</p>
+        <p class="appt-perks">✓ Miễn phí tham quan · Không bắt buộc đặt cọc · Chủ căn hộ sẽ xác nhận qua thông báo.</p>
       </div>
     </aside>
   </div>

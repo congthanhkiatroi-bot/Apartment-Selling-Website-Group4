@@ -3,14 +3,16 @@ package com.apartment.website.appointment.controller;
 import com.apartment.website.appointment.dto.BookingRequest;
 import com.apartment.website.appointment.dto.DaySlot;
 import com.apartment.website.appointment.dto.SlotInfo;
-import com.apartment.website.appointment.entity.Appointment;
+import com.apartment.website.appointment.entity.PropertyViewing;
 import com.apartment.website.appointment.service.AppointmentService;
 import com.apartment.website.common.exception.BookingException;
 import com.apartment.website.common.exception.SlotTakenException;
+import com.apartment.website.common.filter.AuthFilter;
 import com.apartment.website.common.util.View;
 import com.apartment.website.config.AppContextListener;
 import com.apartment.website.property.entity.Property;
 import com.apartment.website.property.service.PropertyService;
+import com.apartment.website.user.entity.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -32,13 +34,15 @@ import java.util.Map;
 /**
  * /appointments?propertyId=1&month=2026-11&date=2026-11-05&time=09:30
  *  GET  : vẽ lịch, khung giờ, form. Chọn ngày / giờ = bấm vào liên kết (đổi tham số trên URL), không cần JavaScript.
- *  POST : nhận form đặt lịch -> kiểm tra -> lưu -> chuyển hướng về GET kèm &booked=<mã lịch hẹn>.
+ *         Ai cũng xem được lịch trống; chỉ KHÁCH HÀNG đã đăng nhập mới thấy form đặt lịch.
+ *  POST : khách gửi form -> kiểm tra -> lưu vào property_viewings (Chờ xác nhận) -> báo cho chủ căn hộ
+ *         -> chuyển hướng về GET kèm &booked=<viewing_id>.
  */
 @WebServlet("/appointments")
 public class AppointmentServlet extends HttpServlet {
     private static final String[] DAY_OF_WEEK = {"Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật"};
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final String[] FORM_FIELDS = {"fullName", "phone", "email", "attendees", "note"};
+    private static final String[] FORM_FIELDS = {"customerName", "customerPhone", "note"};
 
     private AppointmentService appointmentService;
     private PropertyService propertyService;
@@ -61,22 +65,27 @@ public class AppointmentServlet extends HttpServlet {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+        // chưa đăng nhập -> đăng nhập xong quay lại đúng trang đặt lịch của căn này
+        User user = AuthFilter.getLoginUser(request);
+        if (user == null) {
+            String next = "/appointments?propertyId=" + propertyId;
+            response.sendRedirect(request.getContextPath() + "/auth?action=login&next=" + encode(next));
+            return;
+        }
 
         BookingRequest booking = new BookingRequest(
                 propertyId,
                 getText(request, "date"),
                 getText(request, "time"),
-                getText(request, "fullName"),
-                getText(request, "phone"),
-                getText(request, "email"),
-                getText(request, "attendees"),
+                getText(request, "customerName"),
+                getText(request, "customerPhone"),
                 getText(request, "note"));
 
         try {
-            long appointmentId = appointmentService.book(booking);
+            long viewingId = appointmentService.book(booking, user);
             // redirect để F5 không gửi lại form
             response.sendRedirect(request.getContextPath() + "/appointments?propertyId=" + propertyId
-                    + "&booked=" + appointmentId);
+                    + "&booked=" + viewingId);
             return;
         } catch (SlotTakenException e) {
             request.setAttribute("error", "Khung giờ này vừa có người đặt. Vui lòng chọn khung giờ khác.");
@@ -194,15 +203,30 @@ public class AppointmentServlet extends HttpServlet {
             slots.add(slot);
         }
 
+        // ---- ai đang xem trang: khách (đặt được), chủ căn hộ / chưa đăng nhập (chỉ xem) ----
+        User user = AuthFilter.getLoginUser(request);
+        boolean canBook = user != null && user.isCustomer();
+        // lần đầu mở form: điền sẵn họ tên, SĐT trong tài khoản
+        if (canBook && request.getAttribute("form") == null) {
+            Map<String, String> form = new HashMap<String, String>();
+            form.put("customerName", user.getFullName());
+            form.put("customerPhone", user.getPhone());
+            request.setAttribute("form", form);
+        }
+        String loginUrl = request.getContextPath() + "/auth?action=login&next="
+                + encode("/appointments?propertyId=" + propertyId);
+
         // ---- lịch vừa đặt xong (hiện thông báo thành công) ----
         Long bookedId = toLong(request.getParameter("booked"));
-        if (bookedId != null) {
-            Appointment appointment = appointmentService.findById(bookedId);
-            if (appointment != null) {
+        if (bookedId != null && user != null) {
+            PropertyViewing viewing = appointmentService.findById(bookedId);
+            // chỉ hiện cho đúng khách đã đặt lịch đó
+            if (viewing != null && viewing.getCustomerId() == user.getUserId()) {
                 Map<String, Object> booked = new HashMap<String, Object>();
-                booked.put("id", appointment.getId());
-                booked.put("dateText", formatDate(appointment.getDate()));
-                booked.put("time", appointment.getTimeSlot());
+                booked.put("id", viewing.getViewingId());
+                booked.put("dateText", formatDate(viewing.getStartTime().toLocalDate()));
+                booked.put("time", viewing.getTimeText());
+                booked.put("status", viewing.getStatus());
                 request.setAttribute("booked", booked);
             }
         }
@@ -232,6 +256,10 @@ public class AppointmentServlet extends HttpServlet {
         request.setAttribute("selectedTime", selectedTime);
         request.setAttribute("dateText", formatDate(selectedDate));
         request.setAttribute("timeText", timeText);
+        request.setAttribute("canBook", canBook);
+        request.setAttribute("isOwnerViewer", user != null && user.isOwner());
+        request.setAttribute("loginUrl", loginUrl);
+        request.setAttribute("ownerAccount", propertyService.ownerOf(propertyId));
         View.forward(request, response, "appointment/schedule");
     }
 

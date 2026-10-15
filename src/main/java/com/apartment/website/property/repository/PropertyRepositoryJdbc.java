@@ -227,14 +227,14 @@ public class PropertyRepositoryJdbc implements PropertyRepository {
 
     @Override
     public Owner ownerOf(long propertyId) {
-        // owners.phone: số điện thoại chủ sở hữu (trước đây tên là tax_code, nhóm đã đổi tên cột)
-        String sql = "SELECT u.user_id, u.username, u.email, u.password_hash, u.created_at, u.is_active, o.phone "
-                + "FROM listings l "
-                + "JOIN owners o ON o.owner_id = l.owner_id "
+        // Chủ căn hộ: properties -> apartments.owner_id -> owners + users (số điện thoại ở users.phone)
+        String sql = "SELECT u.user_id, u.username, u.email, u.role, u.created_at, u.is_active, "
+                + "u.full_name, u.phone, o.tax_code, o.identity_verified "
+                + "FROM properties p "
+                + "JOIN apartments a ON a.apartment_id = p.apartment_id "
+                + "JOIN owners o ON o.owner_id = a.owner_id "
                 + "JOIN users u ON u.user_id = o.owner_id "
-                + "WHERE l.property_id = ? "
-                + "ORDER BY (l.status = 'ACTIVE') DESC, l.post_date DESC "
-                + "LIMIT 1";
+                + "WHERE p.property_id = ?";
 
         Owner owner = null;
         try (Connection connection = Database.getConnection()) {
@@ -242,14 +242,16 @@ public class PropertyRepositoryJdbc implements PropertyRepository {
                 statement.setLong(1, propertyId);
                 try (ResultSet rs = statement.executeQuery()) {
                     if (rs.next()) {
-                        long userId = rs.getLong("user_id");
-                        String username = rs.getString("username");
-                        String email = rs.getString("email");
-                        String passwordHash = rs.getString("password_hash");
-                        LocalDateTime createdAt = rs.getObject("created_at", LocalDateTime.class);
-                        boolean active = rs.getInt("is_active") == 1;
-                        String phone = rs.getString("phone");
-                        owner = new Owner(userId, username, email, passwordHash, createdAt, active, phone);
+                        owner = new Owner();
+                        owner.setUserId(rs.getLong("user_id"));
+                        owner.setUsername(rs.getString("username"));
+                        owner.setEmail(rs.getString("email"));
+                        owner.setCreatedAt(rs.getObject("created_at", LocalDateTime.class));
+                        owner.setActive(rs.getInt("is_active") == 1);
+                        owner.setFullName(rs.getString("full_name"));
+                        owner.setPhone(rs.getString("phone"));
+                        owner.setTaxCode(rs.getString("tax_code"));
+                        owner.setIdentityVerified(rs.getBoolean("identity_verified"));
                     }
                 }
             }

@@ -3,10 +3,11 @@ package com.apartment.website.property.entity;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/** Căn hộ vật lý trong một tòa nhà (bảng apartments). Diagram: Apartment thuộc 1 Building, Property rao bán 1 Apartment. */
+/** Căn hộ vật lý trong một tòa nhà (bảng apartments). Diagram: Apartment thuộc 1 Building và 1 Owner, Property rao bán 1 Apartment. */
 public class Apartment {
     private final long apartmentId;
     private final Building building;
+    private final long ownerId;
     private final String apartmentCode;
     private final int floorNumber;
     private final String roomNumber;
@@ -20,11 +21,12 @@ public class Apartment {
     private final String status;
     private final LocalDateTime createdAt;
 
-    public Apartment(long apartmentId, Building building, String apartmentCode, int floorNumber, String roomNumber,
+    public Apartment(long apartmentId, Building building, long ownerId, String apartmentCode, int floorNumber, String roomNumber,
                      BigDecimal area, int bedrooms, int bathrooms, BigDecimal balconyArea, String direction,
                      String viewType, String legalStatus, String status, LocalDateTime createdAt) {
         this.apartmentId = apartmentId;
         this.building = building;
+        this.ownerId = ownerId;
         this.apartmentCode = apartmentCode;
         this.floorNumber = floorNumber;
         this.roomNumber = roomNumber;
@@ -45,6 +47,11 @@ public class Apartment {
 
     public Building getBuilding() {
         return building;
+    }
+
+    /** Cột apartments.owner_id: chủ của căn hộ. */
+    public long getOwnerId() {
+        return ownerId;
     }
 
     public String getApartmentCode() {

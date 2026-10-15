@@ -3,11 +3,14 @@ package com.apartment.website.appointment.service;
 import com.apartment.website.appointment.dto.BookingRequest;
 import com.apartment.website.appointment.dto.DaySlot;
 import com.apartment.website.appointment.dto.SlotInfo;
-import com.apartment.website.appointment.entity.Appointment;
-import com.apartment.website.appointment.repository.AppointmentRepository;
+import com.apartment.website.appointment.entity.PropertyViewing;
+import com.apartment.website.appointment.repository.PropertyViewingRepository;
 import com.apartment.website.common.exception.BookingException;
+import com.apartment.website.notification.service.NotificationService;
+import com.apartment.website.user.entity.User;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
@@ -15,21 +18,31 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-/** Quy tắc đặt lịch: khung giờ, trạng thái ngày, kiểm tra dữ liệu. */
+/**
+ * Quy tắc lịch hẹn xem nhà (bảng property_viewings):
+ *  - Khách đặt lịch -> "Chờ xác nhận" -> báo cho chủ căn hộ.
+ *  - Chủ căn hộ xác nhận / từ chối / đánh dấu hoàn thành / hủy -> báo cho khách.
+ *  - Khách hủy lịch -> báo cho chủ căn hộ.
+ */
 public class AppointmentService {
     public static final ZoneId ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
     // còn <= 2 khung giờ thì hiện "Ít chỗ"
     public static final int FEW_LEFT = 2;
     // cho đặt tối đa tới hết tháng thứ (hiện tại + 3)
     public static final int MAX_MONTHS_AHEAD = 3;
-    private static final int MAX_NAME = 100;
-    private static final int MAX_EMAIL = 100;
-    private static final int MAX_NOTE = 500;
-    private static final int MAX_ATTENDEES = 10;
+    // giới hạn theo độ dài cột trong bảng property_viewings
+    private static final int MAX_NAME = 150;
+    private static final int MAX_NOTE = 1000;
+    private static final int MAX_REASON = 500;
 
-    /** Các khung giờ xem nhà trong 1 ngày. */
+    // các thao tác trên trang "Lịch hẹn" (tham số action)
+    public static final String ACTION_CONFIRM = "confirm";
+    public static final String ACTION_REJECT = "reject";
+    public static final String ACTION_COMPLETE = "complete";
+    public static final String ACTION_CANCEL = "cancel";
+
+    /** Các khung giờ xem nhà trong 1 ngày, mỗi khung 30 phút (DB bắt buộc end_time = start_time + 30 phút). */
     public static final List<String> SLOTS = new ArrayList<String>();
 
     static {
@@ -43,10 +56,12 @@ public class AppointmentService {
         SLOTS.add("17:30");
     }
 
-    private final AppointmentRepository repository;
+    private final PropertyViewingRepository repository;
+    private final NotificationService notificationService;
 
-    public AppointmentService(AppointmentRepository repository) {
+    public AppointmentService(PropertyViewingRepository repository, NotificationService notificationService) {
         this.repository = repository;
+        this.notificationService = notificationService;
     }
 
     public LocalDate today() {
@@ -79,6 +94,8 @@ public class AppointmentService {
         }
         return month;
     }
+
+    // ===================== LỊCH & KHUNG GIỜ =====================
 
     /** Trạng thái từng ngày của một tháng (để vẽ lịch). */
     public List<DaySlot> month(long propertyId, YearMonth month) {
@@ -131,24 +148,43 @@ public class AppointmentService {
         return count;
     }
 
-    /** Các khung giờ của 1 ngày, đánh dấu cái nào còn trống (đã đặt hoặc đã qua giờ thì không trống). */
+    /** Các khung giờ của 1 ngày, đánh dấu cái nào còn trống (trùng lịch khác hoặc đã qua giờ thì không trống). */
     public List<SlotInfo> slots(long propertyId, LocalDate date) {
-        Set<String> booked = repository.bookedSlots(propertyId, date);
-        LocalTime now = LocalTime.now(ZONE);
-        boolean isToday = date.equals(today());
+        List<LocalDateTime> bookedStarts = repository.bookedStartTimes(propertyId, date);
+        LocalDateTime now = LocalDateTime.now(ZONE);
 
         List<SlotInfo> result = new ArrayList<SlotInfo>();
         for (int i = 0; i < SLOTS.size(); i++) {
             String time = SLOTS.get(i);
-            boolean past = isToday && LocalTime.parse(time).isBefore(now);
-            boolean available = !booked.contains(time) && !past;
-            result.add(new SlotInfo(time, available));
+            LocalDateTime slotStart = date.atTime(LocalTime.parse(time));
+            LocalDateTime slotEnd = slotStart.plusMinutes(PropertyViewing.DURATION_MINUTES);
+
+            boolean past = slotStart.isBefore(now);
+            boolean overlap = false;
+            for (int j = 0; j < bookedStarts.size(); j++) {
+                LocalDateTime bookedStart = bookedStarts.get(j);
+                LocalDateTime bookedEnd = bookedStart.plusMinutes(PropertyViewing.DURATION_MINUTES);
+                // 2 khoảng [a, b) và [c, d) giao nhau khi a < d và c < b
+                if (slotStart.isBefore(bookedEnd) && bookedStart.isBefore(slotEnd)) {
+                    overlap = true;
+                }
+            }
+            result.add(new SlotInfo(time, !past && !overlap));
         }
         return result;
     }
 
-    /** Kiểm tra dữ liệu rồi lưu. Ném BookingException (dữ liệu sai) hoặc SlotTakenException (giờ đã bị đặt). */
-    public long book(BookingRequest request) {
+    // ===================== KHÁCH ĐẶT LỊCH =====================
+
+    /**
+     * Khách đặt lịch. Ném BookingException (dữ liệu sai) hoặc SlotTakenException (giờ đã bị đặt).
+     * Thành công thì gửi thông báo cho chủ căn hộ và trả về viewing_id.
+     */
+    public long book(BookingRequest request, User customer) {
+        if (customer == null || !customer.isCustomer()) {
+            throw new BookingException("Chỉ tài khoản khách hàng mới đặt được lịch xem nhà.");
+        }
+
         // 1. Ngày và giờ
         LocalDate date;
         try {
@@ -159,68 +195,167 @@ public class AppointmentService {
         if (!SLOTS.contains(request.getTime())) {
             throw new BookingException("Vui lòng chọn một khung giờ xem nhà.");
         }
-        LocalDate today = today();
-        if (date.isBefore(today) || date.isAfter(maxDate())) {
+        if (date.isBefore(today()) || date.isAfter(maxDate())) {
             throw new BookingException("Ngày đã chọn không hợp lệ.");
         }
-        if (date.equals(today) && LocalTime.parse(request.getTime()).isBefore(LocalTime.now(ZONE))) {
+        LocalDateTime startTime = date.atTime(LocalTime.parse(request.getTime()));
+        if (startTime.isBefore(LocalDateTime.now(ZONE))) {
             throw new BookingException("Khung giờ này đã qua, vui lòng chọn giờ khác.");
         }
 
-        // 2. Thông tin người đặt
-        String name = trimText(request.getFullName());
-        // bỏ khoảng trắng, dấu chấm, gạch ngang: "0901 234.567" -> "0901234567"
-        String phone = trimText(request.getPhone()).replaceAll("[\\s.\\-]", "");
-        String email = trimText(request.getEmail());
+        // 2. Thông tin liên hệ (mặc định lấy từ tài khoản, khách có thể sửa)
+        String name = trimText(request.getCustomerName()).replaceAll("\\s+", " ");
+        String phone = trimText(request.getCustomerPhone()).replaceAll("[\\s.\\-]", "");
         String note = trimText(request.getNote());
-
         if (name.isEmpty() || name.length() > MAX_NAME) {
-            throw new BookingException("Vui lòng nhập họ và tên.");
+            throw new BookingException("Vui lòng nhập họ và tên (tối đa " + MAX_NAME + " ký tự).");
         }
         if (!phone.matches("^(0|\\+84)\\d{9,10}$")) {
             throw new BookingException("Số điện thoại không hợp lệ (ví dụ 0901234567).");
-        }
-        if (!email.isEmpty()) {
-            if (email.length() > MAX_EMAIL || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-                throw new BookingException("Email không hợp lệ.");
-            }
         }
         if (note.length() > MAX_NOTE) {
             throw new BookingException("Ghi chú tối đa " + MAX_NOTE + " ký tự.");
         }
 
-        // 3. Số người đi xem: sai thì coi là 1, giới hạn trong 1..10
-        int attendees;
-        try {
-            attendees = Integer.parseInt(trimText(request.getAttendees()));
-        } catch (NumberFormatException e) {
-            attendees = 1;
+        // 3. Lưu: status = Chờ xác nhận, end_time = start_time + 30 phút
+        PropertyViewing viewing = new PropertyViewing();
+        viewing.setCustomerId(customer.getUserId());
+        viewing.setPropertyId(request.getPropertyId());
+        viewing.setStartTime(startTime);
+        viewing.setEndTime(startTime.plusMinutes(PropertyViewing.DURATION_MINUTES));
+        viewing.setStatus(PropertyViewing.PENDING);
+        viewing.setCustomerName(name);
+        viewing.setCustomerPhone(phone);
+        if (note.isEmpty()) {
+            viewing.setNote(null);
+        } else {
+            viewing.setNote(note);
         }
-        if (attendees < 1) {
-            attendees = 1;
-        }
-        if (attendees > MAX_ATTENDEES) {
-            attendees = MAX_ATTENDEES;
-        }
+        long viewingId = repository.create(viewing);
 
-        // 4. Ô không bắt buộc để trống thì lưu NULL
-        String emailToSave = null;
-        if (!email.isEmpty()) {
-            emailToSave = email;
+        // 4. Báo cho chủ căn hộ (owner_id do trigger điền -> đọc lại để biết)
+        PropertyViewing saved = repository.findById(viewingId);
+        if (saved != null) {
+            String message = "Khách " + saved.getCustomerName() + " (" + saved.getCustomerPhone() + ") muốn xem căn \""
+                    + saved.getPropertyTitle() + "\" lúc " + saved.getTimeText() + " ngày " + saved.getDateText()
+                    + ". Vui lòng xác nhận lịch hẹn.";
+            notificationService.notifyViewing(saved.getOwnerId(), "Lịch hẹn mới chờ xác nhận", message, viewingId);
         }
-        String noteToSave = null;
-        if (!note.isEmpty()) {
-            noteToSave = note;
-        }
+        return viewingId;
+    }
 
-        Appointment appointment = new Appointment(0, request.getPropertyId(), name, phone, emailToSave,
-                attendees, noteToSave, date, request.getTime(), "PENDING");
-        return repository.create(appointment);
+    // ===================== TRANG "LỊCH HẸN" =====================
+
+    /** Chủ căn hộ thấy lịch hẹn của các căn mình; khách thấy lịch mình đã đặt. */
+    public List<PropertyViewing> viewingsOf(User user) {
+        if (user.isOwner()) {
+            return repository.findByOwner(user.getUserId());
+        }
+        return repository.findByCustomer(user.getUserId());
     }
 
     /** Trả về null nếu không tìm thấy. */
-    public Appointment findById(long id) {
-        return repository.findById(id);
+    public PropertyViewing findById(long viewingId) {
+        return repository.findById(viewingId);
+    }
+
+    /**
+     * Đổi trạng thái 1 lịch hẹn theo thao tác action rồi gửi thông báo cho bên còn lại.
+     * Trả về câu thông báo thành công. Sai quyền / sai trạng thái thì ném BookingException.
+     */
+    public String changeStatus(long viewingId, User user, String action, String reasonText) {
+        PropertyViewing viewing = repository.findById(viewingId);
+        if (viewing == null) {
+            throw new BookingException("Không tìm thấy lịch hẹn.");
+        }
+        String reason = trimText(reasonText);
+        if (reason.length() > MAX_REASON) {
+            throw new BookingException("Lý do tối đa " + MAX_REASON + " ký tự.");
+        }
+        if (reason.isEmpty()) {
+            reason = null;
+        }
+
+        if (user.isOwner()) {
+            return changeByOwner(viewing, user, action, reason);
+        }
+        if (user.isCustomer()) {
+            return changeByCustomer(viewing, user, action, reason);
+        }
+        throw new BookingException("Tài khoản này không thao tác được lịch hẹn.");
+    }
+
+    private String changeByOwner(PropertyViewing viewing, User owner, String action, String reason) {
+        String fromStatus;
+        String toStatus;
+        String title;
+        String result;
+        if (ACTION_CONFIRM.equals(action)) {
+            fromStatus = PropertyViewing.PENDING;
+            toStatus = PropertyViewing.CONFIRMED;
+            title = "Lịch hẹn đã được xác nhận";
+            result = "Đã xác nhận lịch hẹn.";
+        } else if (ACTION_REJECT.equals(action)) {
+            fromStatus = PropertyViewing.PENDING;
+            toStatus = PropertyViewing.REJECTED;
+            title = "Lịch hẹn bị từ chối";
+            result = "Đã từ chối lịch hẹn.";
+        } else if (ACTION_COMPLETE.equals(action)) {
+            fromStatus = PropertyViewing.CONFIRMED;
+            toStatus = PropertyViewing.COMPLETED;
+            title = "Lịch hẹn đã hoàn thành";
+            result = "Đã đánh dấu hoàn thành.";
+            if (viewing.getStartTime().isAfter(LocalDateTime.now(ZONE))) {
+                throw new BookingException("Chưa tới giờ xem nhà nên chưa thể đánh dấu hoàn thành.");
+            }
+        } else if (ACTION_CANCEL.equals(action)) {
+            fromStatus = PropertyViewing.CONFIRMED;
+            toStatus = PropertyViewing.CANCELLED;
+            title = "Lịch hẹn đã bị hủy";
+            result = "Đã hủy lịch hẹn.";
+        } else {
+            throw new BookingException("Thao tác không hợp lệ.");
+        }
+
+        boolean changed = repository.changeStatus(viewing.getViewingId(), owner.getUserId(), true,
+                fromStatus, toStatus, reason);
+        if (!changed) {
+            throw new BookingException("Lịch hẹn này đã đổi trạng thái hoặc không thuộc căn của bạn. Vui lòng tải lại trang.");
+        }
+
+        // báo cho khách
+        String message = "Lịch xem căn \"" + viewing.getPropertyTitle() + "\" lúc " + viewing.getTimeText()
+                + " ngày " + viewing.getDateText() + " đã chuyển sang: " + toStatus + ".";
+        if (reason != null) {
+            message = message + " Lý do: " + reason;
+        }
+        notificationService.notifyViewing(viewing.getCustomerId(), title, message, viewing.getViewingId());
+        return result;
+    }
+
+    private String changeByCustomer(PropertyViewing viewing, User customer, String action, String reason) {
+        if (!ACTION_CANCEL.equals(action)) {
+            throw new BookingException("Khách hàng chỉ có thể hủy lịch hẹn.");
+        }
+        // khách hủy được khi lịch đang chờ hoặc đã xác nhận
+        boolean changed = repository.changeStatus(viewing.getViewingId(), customer.getUserId(), false,
+                PropertyViewing.PENDING, PropertyViewing.CANCELLED, reason);
+        if (!changed) {
+            changed = repository.changeStatus(viewing.getViewingId(), customer.getUserId(), false,
+                    PropertyViewing.CONFIRMED, PropertyViewing.CANCELLED, reason);
+        }
+        if (!changed) {
+            throw new BookingException("Lịch hẹn này không thể hủy nữa. Vui lòng tải lại trang.");
+        }
+
+        // báo cho chủ căn hộ
+        String message = "Khách " + viewing.getCustomerName() + " đã hủy lịch xem căn \"" + viewing.getPropertyTitle()
+                + "\" lúc " + viewing.getTimeText() + " ngày " + viewing.getDateText() + ".";
+        if (reason != null) {
+            message = message + " Lý do: " + reason;
+        }
+        notificationService.notifyViewing(viewing.getOwnerId(), "Khách đã hủy lịch hẹn", message, viewing.getViewingId());
+        return "Đã hủy lịch hẹn.";
     }
 
     private static String trimText(String text) {

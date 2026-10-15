@@ -5,9 +5,9 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Apartment Website</title>
-  <link rel="stylesheet" href="${ctx}/css/base.css">
-  <link rel="stylesheet" href="${ctx}/css/layout.css">
-  <link rel="stylesheet" href="${ctx}/css/home.css">
+  <link rel="stylesheet" href="${ctx}/css/base.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/layout.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/home.css?v=6">
 </head>
 <body id="top">
 <jsp:include page="/WEB-INF/views/partials/header.jsp"/>
@@ -66,9 +66,9 @@
         <p>Từ tìm kiếm căn hộ đến đặt lịch xem và quản lý giao dịch.</p></div>
       <div class="service-grid">
         <div class="service-card"><div class="service-icon">🏠</div><h3>Tìm căn hộ</h3><p>Tìm kiếm và lọc căn hộ theo nhu cầu.</p><a href="${ctx}/properties" class="service-link">Khám phá →</a></div>
-        <div class="service-card"><div class="service-icon">📝</div><h3>Đăng tin</h3><p>Đăng tin bất động sản nhanh chóng.</p><a href="${ctx}/postings/create" class="service-link">Khám phá →</a></div>
+        <div class="service-card"><div class="service-icon">📝</div><h3>Đăng tin</h3><p>Đăng tin bất động sản nhanh chóng.</p><a href="${ctx}${currentUser.owner ? '/postings?action=create' : '/auth?action=register&role=OWNER'}" class="service-link">Khám phá →</a></div>
         <div class="service-card"><div class="service-icon">⚖️</div><h3>So sánh</h3><p>So sánh nhiều căn hộ trước khi quyết định.</p><a href="${ctx}/comparisons" class="service-link">Khám phá →</a></div>
-        <div class="service-card"><div class="service-icon">📅</div><h3>Đặt lịch xem</h3><p>Chủ động chọn thời gian xem căn hộ.</p><a href="${ctx}/appointments" class="service-link">Khám phá →</a></div>
+        <div class="service-card"><div class="service-icon">📅</div><h3>Đặt lịch xem</h3><p>Chủ động chọn thời gian xem căn hộ.</p><a href="${ctx}/properties" class="service-link">Khám phá →</a></div>
       </div>
     </div>
   </section>

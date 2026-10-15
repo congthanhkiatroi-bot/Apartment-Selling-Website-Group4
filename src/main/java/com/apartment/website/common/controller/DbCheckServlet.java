@@ -18,8 +18,8 @@ import java.sql.SQLException;
 public class DbCheckServlet extends HttpServlet {
     private static final String[] TABLES = {
             "users", "customers", "owners", "buildings", "apartments", "properties",
-            "customer_locations", "property_images", "listings", "favorites", "transactions", "reviews",
-            "property_viewings", "rental_apartments", "rental_apartment_images"
+            "property_images", "listings", "favorites", "reviews", "notifications",
+            "property_viewings", "property_reports", "report_actions", "admin_activity_logs"
     };
 
     @Override

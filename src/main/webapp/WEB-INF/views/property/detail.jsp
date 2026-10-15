@@ -5,9 +5,9 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title><c:out value="${property.title}"/></title>
-  <link rel="stylesheet" href="${ctx}/css/base.css">
-  <link rel="stylesheet" href="${ctx}/css/layout.css">
-  <link rel="stylesheet" href="${ctx}/css/property-detail.css">
+  <link rel="stylesheet" href="${ctx}/css/base.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/layout.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/property-detail.css?v=6">
 </head>
 <body id="top">
 <jsp:include page="/WEB-INF/views/partials/header.jsp"/>
@@ -85,29 +85,35 @@
         <c:if test="${reviewStatus == 'updated'}"><p class="alert alert--ok">Đã cập nhật đánh giá trước đó của bạn.</p></c:if>
         <c:if test="${not empty reviewError}"><p class="alert alert--err"><c:out value="${reviewError}"/></p></c:if>
 
-        <!-- FORM: POST /properties với action=review & id=<mã căn> (2 ô ẩn). Chọn sao bằng radio (không cần JavaScript). -->
-        <form class="review-form" method="post" action="${ctx}/properties#reviews">
-          <input type="hidden" name="action" value="review">
-          <input type="hidden" name="id" value="<c:out value="${property.propertyId}"/>">
-          <p class="field__label">Bạn chấm căn hộ này mấy sao?</p>
-          <div class="star-input" role="radiogroup" aria-label="Số sao">
-            <c:forEach var="s" begin="1" end="5">
-              <c:set var="star" value="${6 - s}"/>
-              <input type="radio" id="star${star}" name="rating" value="${star}" ${reviewForm.rating == ('' += star) ? 'checked' : ''}>
-              <label for="star${star}" title="${star} sao">★</label>
-            </c:forEach>
-          </div>
-          <div class="field-row">
-            <label class="field"><span class="field__label">Họ tên</span>
-              <input class="input" name="name" maxlength="40" required value="<c:out value="${reviewForm.name}"/>"></label>
-            <label class="field"><span class="field__label">Email</span>
-              <input class="input" type="email" name="email" maxlength="100" required value="<c:out value="${reviewForm.email}"/>"></label>
-          </div>
-          <label class="field"><span class="field__label">Nhận xét</span>
-            <textarea class="input textarea" name="comment" maxlength="1000" required placeholder="Vị trí, tiện ích, chủ nhà, giá cả..."><c:out value="${reviewForm.comment}"/></textarea></label>
-          <p class="review-form__hint">Mỗi email chỉ có 1 đánh giá cho mỗi căn; gửi lại sẽ cập nhật đánh giá cũ.</p>
-          <button class="btn btn--primary" type="submit">Gửi đánh giá</button>
-        </form>
+        <%-- FORM: chỉ khách hàng đã đăng nhập mới gửi được (reviews.customer_id phải là tài khoản CUSTOMER) --%>
+        <c:choose>
+          <c:when test="${currentUser.customer}">
+            <form class="review-form" method="post" action="${ctx}/properties#reviews">
+              <input type="hidden" name="action" value="review">
+              <input type="hidden" name="id" value="<c:out value="${property.propertyId}"/>">
+              <p class="field__label">Bạn chấm căn hộ này mấy sao?</p>
+              <div class="star-input" role="radiogroup" aria-label="Số sao">
+                <c:forEach var="s" begin="1" end="5">
+                  <c:set var="star" value="${6 - s}"/>
+                  <input type="radio" id="star${star}" name="rating" value="${star}" ${reviewForm.rating == ('' += star) ? 'checked' : ''}>
+                  <label for="star${star}" title="${star} sao">★</label>
+                </c:forEach>
+              </div>
+              <p class="review-form__as">Đánh giá với tên <b><c:out value="${currentUser.fullName}"/></b></p>
+              <label class="field"><span class="field__label">Nhận xét</span>
+                <textarea class="input textarea" name="comment" maxlength="1000" required placeholder="Vị trí, tiện ích, chủ nhà, giá cả..."><c:out value="${reviewForm.comment}"/></textarea></label>
+              <p class="review-form__hint">Mỗi tài khoản chỉ có 1 đánh giá cho mỗi căn; gửi lại sẽ cập nhật đánh giá cũ.</p>
+              <button class="btn btn--primary" type="submit">Gửi đánh giá</button>
+            </form>
+          </c:when>
+          <c:when test="${not empty currentUser}">
+            <p class="review-login">Chỉ tài khoản <b>khách hàng</b> mới gửi được đánh giá.</p>
+          </c:when>
+          <c:otherwise>
+            <c:url var="reviewLoginUrl" value="/auth"><c:param name="action" value="login"/><c:param name="next" value="/properties?action=detail&id=${property.propertyId}"/></c:url>
+            <p class="review-login"><a class="btn btn--outline" href="${reviewLoginUrl}">Đăng nhập để đánh giá</a> Bạn cần tài khoản khách hàng để chấm sao và nhận xét.</p>
+          </c:otherwise>
+        </c:choose>
 
         <ul class="review-list">
           <c:forEach var="r" items="${reviews}">
@@ -127,14 +133,15 @@
 
     <!-- ===== CỘT PHẢI (dính khi cuộn): chủ sở hữu, nút hành động ===== -->
     <aside class="detail__side">
-      <!-- CHỦ SỞ HỮU: Controller gửi "owner" (Owner kế thừa User) và "ownerListings" -->
+      <!-- CHỦ SỞ HỮU: Controller gửi "owner" (Owner kế thừa User: full_name, phone ở bảng users) và "ownerListings" -->
       <div class="owner-card">
         <div class="owner-card__banner"><span class="owner-card__label">Chủ sở hữu</span></div>
         <c:choose>
           <c:when test="${not empty owner}">
             <div class="owner-card__body">
               <span class="owner-card__avatar" aria-hidden="true"><c:out value="${owner.initial}"/></span>
-              <p class="owner-card__name"><c:out value="${owner.username}"/></p>
+              <p class="owner-card__name"><c:out value="${owner.fullName}"/></p>
+              <c:if test="${owner.identityVerified}"><p class="owner-card__verified">✔ Đã xác minh danh tính</p></c:if>
               <ul class="owner-card__stats">
                 <li><b><c:out value="${ownerListings}"/></b><span>tin đang đăng</span></li>
                 <li><b><c:out value="${owner.memberSince}"/></b><span>thành viên từ</span></li>

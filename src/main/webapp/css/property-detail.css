@@ -103,3 +103,8 @@
 
 @media(max-width:900px){.detail{grid-template-columns:1fr}.detail__side{position:static}.similar__grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.similar__grid,.spec-grid,.field-row{grid-template-columns:1fr}.review-summary{grid-template-columns:1fr}.gallery__main{height:240px}}
+
+/* Đánh giá: dòng "đánh giá với tên ...", hộp mời đăng nhập, nhãn đã xác minh của chủ căn hộ */
+.review-form__as{margin-bottom:10px;color:var(--muted);font-size:14px}
+.review-login{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px 0 16px;margin-bottom:8px;border-bottom:1px solid var(--line);color:var(--muted)}
+.owner-card__verified{margin-top:4px;color:var(--green-dark);font-size:13px;font-weight:700}
