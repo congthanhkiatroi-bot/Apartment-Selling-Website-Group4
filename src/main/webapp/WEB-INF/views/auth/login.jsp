@@ -1,13 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" session="false" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%-- AuthServlet gửi sang: form.phoneOrEmail (giữ lại khi nhập sai), error, next (trang cần quay lại sau khi đăng nhập) --%>
+<%-- AuthServlet gửi sang: phoneOrEmail (giữ lại khi nhập sai hoặc đọc từ cookie "rememberPhone"), remember, error, next --%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Đăng nhập</title>
   <link rel="stylesheet" href="${ctx}/css/base.css?v=6">
-  <link rel="stylesheet" href="${ctx}/css/auth.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/auth.css?v=7">
 </head>
 <body>
 <main class="auth-page">
@@ -30,11 +30,16 @@
 
         <label class="sr-only" for="phoneOrEmail">Số điện thoại hoặc email</label>
         <input class="auth-input" id="phoneOrEmail" name="phoneOrEmail" required autocomplete="username"
-               placeholder="SĐT chính hoặc email" value="<c:out value="${form.phoneOrEmail}"/>">
+               placeholder="SĐT chính hoặc email" value="<c:out value="${phoneOrEmail}"/>">
 
         <label class="sr-only" for="password">Mật khẩu</label>
         <input class="auth-input" id="password" name="password" type="password" required autocomplete="current-password"
                placeholder="Mật khẩu">
+
+        <%-- tick vào thì AuthServlet lưu SĐT/email vào Cookie "rememberPhone" 30 ngày (KHÔNG lưu mật khẩu) --%>
+        <label class="auth-remember">
+          <input type="checkbox" name="remember" value="1" ${remember ? 'checked' : ''}> Ghi nhớ số điện thoại / email
+        </label>
 
         <button class="auth-submit" type="submit">Đăng nhập</button>
       </form>

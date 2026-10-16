@@ -16,7 +16,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Đăng ký tài khoản</title>
   <link rel="stylesheet" href="${ctx}/css/base.css?v=6">
-  <link rel="stylesheet" href="${ctx}/css/auth.css?v=6">
+  <link rel="stylesheet" href="${ctx}/css/auth.css?v=7">
 </head>
 <body>
 <main class="auth-page">
@@ -73,11 +73,11 @@
                placeholder="Địa chỉ Email" value="<c:out value="${form.email}"/>">
 
         <label class="sr-only" for="password">Mật khẩu</label>
-        <input class="auth-input" id="password" name="password" type="password" minlength="8" required
+        <input class="auth-input" id="password" name="password" type="password" minlength="8" maxlength="72" required
                autocomplete="new-password" placeholder="Mật khẩu (tối thiểu 8 ký tự, có chữ và số)">
 
         <label class="sr-only" for="confirmPassword">Xác nhận lại mật khẩu</label>
-        <input class="auth-input" id="confirmPassword" name="confirmPassword" type="password" minlength="8" required
+        <input class="auth-input" id="confirmPassword" name="confirmPassword" type="password" minlength="8" maxlength="72" required
                autocomplete="new-password" placeholder="Xác nhận lại mật khẩu">
 
         <button class="auth-submit" type="submit">Hoàn tất đăng ký</button>

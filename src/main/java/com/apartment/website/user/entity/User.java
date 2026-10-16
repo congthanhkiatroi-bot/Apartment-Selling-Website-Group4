@@ -197,7 +197,7 @@ public class User implements Serializable {
 
     /** Chữ cái đầu của tên cuối, làm avatar: "Nguyễn Văn Hùng" -> "H". */
     public String getInitial() {
-        if (fullName == null || fullName.isBlank()) {
+        if (fullName == null || fullName.trim().isEmpty()) {
             return "?";
         }
         String[] words = fullName.trim().split("\\s+");

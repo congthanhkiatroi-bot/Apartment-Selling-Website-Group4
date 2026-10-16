@@ -14,7 +14,6 @@ import com.apartment.website.property.service.PropertyService;
 import com.apartment.website.user.entity.Owner;
 import com.apartment.website.user.entity.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,20 +22,16 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Điều hướng bằng tham số action:
  *  GET  /properties                          -> danh sách (lọc + phân trang)  -> views/property/list.jsp
  *  GET  /properties?action=detail&id=3       -> chi tiết căn id 3              -> views/property/detail.jsp
  *  POST /properties  (action=review, id=3)   -> khách hàng đã đăng nhập gửi đánh giá, xong redirect về trang chi tiết
+ * URL /properties khai báo trong web.xml.
  */
-@WebServlet("/properties")
 public class PropertyServlet extends HttpServlet {
-    private static final String[] REVIEW_FIELDS = {"rating", "comment"};
-
     private PropertyService propertyService;
     private ReviewService reviewService;
 
@@ -87,7 +82,12 @@ public class PropertyServlet extends HttpServlet {
         }
 
         // 2. Gọi Service lấy 1 trang kết quả
-        PropertyFilter filter = new PropertyFilter(keyword, district, bedrooms, price, type);
+        PropertyFilter filter = new PropertyFilter();
+        filter.setKeyword(keyword);
+        filter.setDistrict(district);
+        filter.setBedrooms(bedrooms);
+        filter.setPrice(price);
+        filter.setType(type);
         PageResult<Property> result = propertyService.search(filter, page);
         // gõ page quá lớn -> lùi về trang cuối
         if (page > result.getTotalPages()) {
@@ -95,20 +95,8 @@ public class PropertyServlet extends HttpServlet {
             result = propertyService.search(filter, page);
         }
 
-        // 3. Danh sách quận cho ô chọn, đánh dấu quận đang chọn
-        List<Map<String, Object>> districts = new ArrayList<Map<String, Object>>();
-        List<String> districtNames = propertyService.districts();
-        for (int i = 0; i < districtNames.size(); i++) {
-            String name = districtNames.get(i);
-            Map<String, Object> option = new HashMap<String, Object>();
-            option.put("value", name);
-            if (name.equals(district)) {
-                option.put("selected", "selected");
-            } else {
-                option.put("selected", "");
-            }
-            districts.add(option);
-        }
+        // 3. Danh sách quận cho ô chọn (list.jsp tự đánh dấu quận đang chọn)
+        List<String> districts = propertyService.districts();
 
         // 4. Link phân trang giữ nguyên bộ lọc, chỉ đổi số trang ở cuối
         String bedroomsText = "";
@@ -123,16 +111,6 @@ public class PropertyServlet extends HttpServlet {
                 + "&bedrooms=" + bedroomsText
                 + "&page=";
 
-        // "Hiển thị from–to trong tổng số total căn"
-        long from = 0;
-        if (result.getTotal() > 0) {
-            from = (long) (page - 1) * result.getSize() + 1;
-        }
-        long to = (long) page * result.getSize();
-        if (to > result.getTotal()) {
-            to = result.getTotal();
-        }
-
         // 5. Gửi dữ liệu sang JSP
         request.setAttribute("active", "list");
         request.setAttribute("type", type);
@@ -140,52 +118,13 @@ public class PropertyServlet extends HttpServlet {
         request.setAttribute("total", result.getTotal());
         request.setAttribute("noResult", result.getItems().isEmpty());
         request.setAttribute("districts", districts);
-        request.setAttribute("from", from);
-        request.setAttribute("to", to);
+        request.setAttribute("district", district);
+        // "hiển thị from–to": PageResult (JavaBean) tự tính
+        request.setAttribute("from", result.getFrom());
+        request.setAttribute("to", result.getTo());
         request.setAttribute("totalPages", result.getTotalPages());
-        request.setAttribute("pages", buildPageLinks(baseUrl, page, result.getTotalPages()));
+        request.setAttribute("pages", propertyService.pageLinks(baseUrl, page, result.getTotalPages()));
         View.forward(request, response, "property/list");
-    }
-
-    /** « 1 2 3 … 10 »: luôn có trang đầu, trang cuối và 2 trang quanh trang hiện tại. href = null nghĩa là không bấm được. */
-    private static List<Map<String, Object>> buildPageLinks(String baseUrl, int current, int total) {
-        List<Map<String, Object>> links = new ArrayList<Map<String, Object>>();
-
-        String previousHref = null;
-        if (current > 1) {
-            previousHref = baseUrl + (current - 1);
-        }
-        links.add(createLink("«", previousHref, false));
-
-        int lastShown = 0;
-        for (int i = 1; i <= total; i++) {
-            boolean isFirstOrLast = (i == 1 || i == total);
-            boolean nearCurrent = Math.abs(i - current) <= 2;
-            if (!isFirstOrLast && !nearCurrent) {
-                continue;
-            }
-            // có khoảng trống giữa 2 số trang -> chèn dấu …
-            if (i - lastShown > 1) {
-                links.add(createLink("…", null, false));
-            }
-            links.add(createLink(String.valueOf(i), baseUrl + i, i == current));
-            lastShown = i;
-        }
-
-        String nextHref = null;
-        if (current < total) {
-            nextHref = baseUrl + (current + 1);
-        }
-        links.add(createLink("»", nextHref, false));
-        return links;
-    }
-
-    private static Map<String, Object> createLink(String label, String href, boolean active) {
-        Map<String, Object> link = new HashMap<String, Object>();
-        link.put("label", label);
-        link.put("href", href);
-        link.put("active", active);
-        return link;
     }
 
     // ===================== action=detail =====================
@@ -204,7 +143,7 @@ public class PropertyServlet extends HttpServlet {
             return;
         }
 
-        // 2. Ảnh: ảnh lớn là ảnh thứ ?img=..., các ảnh nhỏ là link đổi ?img
+        // 2. Ảnh: ảnh lớn là ảnh thứ ?img=..., các ảnh nhỏ là link đổi ?img (detail.jsp tự ghép link)
         List<String> imageUrls = property.getImageUrls();
         if (imageUrls.isEmpty()) {
             imageUrls = new ArrayList<String>();
@@ -214,18 +153,6 @@ public class PropertyServlet extends HttpServlet {
         Integer imgParam = toInt(request.getParameter("img"));
         if (imgParam != null && imgParam > 0 && imgParam < imageUrls.size()) {
             selected = imgParam;
-        }
-        List<Map<String, Object>> thumbs = new ArrayList<Map<String, Object>>();
-        for (int i = 0; i < imageUrls.size(); i++) {
-            Map<String, Object> thumb = new HashMap<String, Object>();
-            thumb.put("url", imageUrls.get(i));
-            thumb.put("href", request.getContextPath() + "/properties?action=detail&id=" + property.getPropertyId() + "&img=" + i);
-            if (i == selected) {
-                thumb.put("active", "is-active");
-            } else {
-                thumb.put("active", "");
-            }
-            thumbs.add(thumb);
         }
 
         // 3. Căn tương tự: cùng quận và khu vực khác
@@ -242,10 +169,10 @@ public class PropertyServlet extends HttpServlet {
         // 5. Đánh giá
         List<Review> reviews = reviewService.reviews(property.getPropertyId());
         ReviewSummary reviewSummary = reviewService.summary(reviews);
-        // form đánh giá: lần đầu mở trang thì mặc định chọn 5 sao
+        // form đánh giá (JavaBean Review): lần đầu mở trang thì mặc định chọn 5 sao
         if (request.getAttribute("reviewForm") == null) {
-            Map<String, String> defaultForm = new HashMap<String, String>();
-            defaultForm.put("rating", "5");
+            Review defaultForm = new Review();
+            defaultForm.setRating(Review.MAX_RATING);
             request.setAttribute("reviewForm", defaultForm);
         }
 
@@ -253,7 +180,8 @@ public class PropertyServlet extends HttpServlet {
         request.setAttribute("active", "list");
         request.setAttribute("property", property);
         request.setAttribute("mainImage", imageUrls.get(selected));
-        request.setAttribute("images", thumbs);
+        request.setAttribute("images", imageUrls);
+        request.setAttribute("selectedImage", selected);
         request.setAttribute("sameDistrict", sameDistrict);
         request.setAttribute("otherDistrict", otherDistrict);
         request.setAttribute("owner", owner);
@@ -301,12 +229,13 @@ public class PropertyServlet extends HttpServlet {
             request.setAttribute("reviewError", e.getMessage());
         }
 
-        // Dữ liệu sai -> hiện lại trang chi tiết, giữ lại những gì người dùng đã nhập
-        Map<String, String> form = new HashMap<String, String>();
-        for (int i = 0; i < REVIEW_FIELDS.length; i++) {
-            String field = REVIEW_FIELDS[i];
-            form.put(field, getText(request, field));
+        // Dữ liệu sai -> hiện lại trang chi tiết, giữ lại những gì người dùng đã nhập (gói vào JavaBean Review)
+        Review form = new Review();
+        Integer ratingValue = toInt(rating);
+        if (ratingValue != null) {
+            form.setRating(ratingValue);
         }
+        form.setComment(getText(request, "comment"));
         request.setAttribute("reviewForm", form);
         showDetail(request, response);
     }

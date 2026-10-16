@@ -21,13 +21,11 @@ import com.apartment.website.user.service.AuthService;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
-import jakarta.servlet.annotation.WebListener;
 
 /**
  * Chạy 1 lần khi Tomcat khởi động (trước mọi Filter và Servlet): tự tay new các đối tượng và truyền vào nhau
  * qua constructor, rồi cất vào ServletContext để các Servlet / Filter lấy ra dùng.
  */
-@WebListener
 public class AppContextListener implements ServletContextListener {
     public static final String PROPERTY_SERVICE = "propertyService";
     public static final String APPOINTMENT_SERVICE = "appointmentService";

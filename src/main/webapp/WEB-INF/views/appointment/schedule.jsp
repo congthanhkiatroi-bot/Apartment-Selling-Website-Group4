@@ -18,9 +18,10 @@
   <p class="appt-sub">Chọn thời gian phù hợp và để chúng tôi giúp bạn khám phá ngôi nhà tương lai.</p>
 
   <c:if test="${not empty booked}">
-    <div class="alert alert--ok">✓ <b>Đã gửi yêu cầu đặt lịch!</b> Mã lịch hẹn #<c:out value="${booked.id}"/> —
-      <c:out value="${booked.dateText}"/>, <c:out value="${booked.time}"/>. Trạng thái: <b><c:out value="${booked.status}"/></b>.
-      Bạn sẽ nhận thông báo ở 🔔 khi chủ căn hộ xác nhận. <a href="${ctx}/viewings#v${booked.id}"><u>Xem lịch hẹn của tôi</u></a></div>
+    <%-- booked là JavaBean PropertyViewing vừa tạo --%>
+    <div class="alert alert--ok">✓ <b>Đã gửi yêu cầu đặt lịch!</b> Mã lịch hẹn #<c:out value="${booked.viewingId}"/> —
+      <c:out value="${booked.fullDateText}"/>, <c:out value="${booked.timeText}"/>. Trạng thái: <b><c:out value="${booked.status}"/></b>.
+      Bạn sẽ nhận thông báo ở 🔔 khi chủ căn hộ xác nhận. <a href="${ctx}/viewings#v${booked.viewingId}"><u>Xem lịch hẹn của tôi</u></a></div>
   </c:if>
   <c:if test="${not empty error}">
     <div class="alert alert--err">⚠ <c:out value="${error}"/></div>
@@ -48,6 +49,7 @@
       <div class="cal-grid">
         <div class="cal-dow">T2</div><div class="cal-dow">T3</div><div class="cal-dow">T4</div><div class="cal-dow">T5</div>
         <div class="cal-dow">T6</div><div class="cal-dow">T7</div><div class="cal-dow">CN</div>
+        <%-- cells: List<DaySlot> (JavaBean), slots: List<SlotInfo> (JavaBean) do AppointmentService tạo --%>
         <c:forEach var="cell" items="${cells}">
           <c:choose>
             <c:when test="${cell.blank}"><div></div></c:when>

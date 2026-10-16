@@ -2,53 +2,63 @@ package com.apartment.website.property.dto;
 
 import java.math.BigDecimal;
 
-/** Điều kiện lọc từ thanh lọc ở trang danh sách. type = "SALE" (mặc định) hoặc "RENT". */
+/** JavaBean: điều kiện lọc từ thanh lọc ở trang danh sách. type = "SALE" (mặc định) hoặc "RENT". */
 public class PropertyFilter {
-    private final String keyword;
-    private final String district;
-    private final Integer bedrooms;
-    private final String price;
-    private final String type;
+    private String keyword = "";
+    private String district = "";
+    private Integer bedrooms;
+    private String price = "";
+    private String type = "SALE";
 
-    public PropertyFilter(String keyword, String district, Integer bedrooms, String price, String type) {
-        this.keyword = keyword;
-        this.district = district;
-        this.bedrooms = bedrooms;
-        this.price = price;
-        this.type = type;
-    }
-
-    /** Không truyền type -> mặc định chỉ lấy căn BÁN. */
-    public PropertyFilter(String keyword, String district, Integer bedrooms, String price) {
-        this(keyword, district, bedrooms, price, "SALE");
+    public PropertyFilter() {
     }
 
     public String getKeyword() {
         return keyword;
     }
 
+    public void setKeyword(String keyword) {
+        this.keyword = keyword;
+    }
+
     public String getDistrict() {
         return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
     }
 
     public Integer getBedrooms() {
         return bedrooms;
     }
 
+    public void setBedrooms(Integer bedrooms) {
+        this.bedrooms = bedrooms;
+    }
+
     public String getPrice() {
         return price;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
     }
 
     public String getType() {
         return type;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public boolean hasKeyword() {
-        return keyword != null && !keyword.isBlank();
+        return keyword != null && !keyword.trim().isEmpty();
     }
 
     public boolean hasDistrict() {
-        return district != null && !district.isBlank();
+        return district != null && !district.trim().isEmpty();
     }
 
     public boolean isRent() {

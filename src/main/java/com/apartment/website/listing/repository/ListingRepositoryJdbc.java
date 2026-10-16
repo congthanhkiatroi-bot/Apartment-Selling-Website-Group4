@@ -47,7 +47,7 @@ public class ListingRepositoryJdbc implements ListingRepository {
     @Override
     public List<Listing> findAll(String keyword) {
         String sql = "SELECT " + COLUMNS + FROM;
-        boolean hasKeyword = keyword != null && !keyword.isBlank();
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
         if (hasKeyword) {
             // tìm theo tiêu đề tin, mã tin, tên hoặc SĐT chủ căn hộ
             sql = sql + "WHERE l.listing_title ILIKE ? OR l.listing_code ILIKE ? OR u.full_name ILIKE ? OR u.phone LIKE ? ";

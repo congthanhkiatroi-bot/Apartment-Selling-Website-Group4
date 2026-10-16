@@ -118,12 +118,20 @@ public class Review {
 
     /** JSP: ${r.stars} -> "★★★★☆" */
     public String getStars() {
-        return "★".repeat(rating) + "☆".repeat(MAX_RATING - rating);
+        StringBuilder stars = new StringBuilder();
+        for (int i = 1; i <= MAX_RATING; i++) {
+            if (i <= rating) {
+                stars.append("★");
+            } else {
+                stars.append("☆");
+            }
+        }
+        return stars.toString();
     }
 
     /** JSP: ${r.initial} -> chữ cái đầu của tên cuối, làm avatar. */
     public String getInitial() {
-        if (reviewerName == null || reviewerName.isBlank()) {
+        if (reviewerName == null || reviewerName.trim().isEmpty()) {
             return "?";
         }
         String[] words = reviewerName.trim().split("\\s+");

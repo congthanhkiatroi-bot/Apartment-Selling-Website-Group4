@@ -110,7 +110,12 @@ public class PropertyRepositoryJdbc implements PropertyRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return new PageResult<Property>(items, total, page, size);
+        PageResult<Property> result = new PageResult<Property>();
+        result.setItems(items);
+        result.setTotal(total);
+        result.setPage(page);
+        result.setSize(size);
+        return result;
     }
 
     @Override
@@ -285,34 +290,37 @@ public class PropertyRepositoryJdbc implements PropertyRepository {
 
     /** Đọc 1 dòng ResultSet (theo COLUMNS ở trên) thành 1 object Property. */
     private static Property mapProperty(ResultSet rs, List<String> images) throws SQLException {
-        long propertyId = rs.getLong("property_id");
-        String title = rs.getString("title");
-        BigDecimal price = rs.getBigDecimal("price");
-        BigDecimal pricePerM2 = rs.getBigDecimal("price_per_m2");
-        String description = emptyIfNull(rs.getString("description"));
-        String address = emptyIfNull(rs.getString("address"));
-        String buildingName = emptyIfNull(rs.getString("building_name"));
-        String district = emptyIfNull(rs.getString("district"));
-        String city = emptyIfNull(rs.getString("city"));
-        int floor = rs.getInt("floor_number");
-        String area = rs.getBigDecimal("area").stripTrailingZeros().toPlainString();
-        int bedrooms = rs.getInt("bedrooms");
-        int bathrooms = rs.getInt("bathrooms");
-        String direction = emptyIfNull(rs.getString("direction"));
-        String legalStatus = emptyIfNull(rs.getString("legal_status"));
-        String status = rs.getString("status");
-        String thumbnail = Property.imageUrl(rs.getString("thumb"));
-        String listingType = rs.getString("listing_type");
+        Property property = new Property();
+        property.setPropertyId(rs.getLong("property_id"));
+        property.setTitle(rs.getString("title"));
 
-        String priceText = Property.priceText(price);
-        String pricePerM2Text = "";
+        BigDecimal price = rs.getBigDecimal("price");
+        property.setPrice(price);
+        property.setPriceText(Property.priceText(price));
+        BigDecimal pricePerM2 = rs.getBigDecimal("price_per_m2");
         if (pricePerM2 != null) {
-            pricePerM2Text = Property.priceText(pricePerM2);
+            property.setPricePerM2Text(Property.priceText(pricePerM2));
+        } else {
+            property.setPricePerM2Text("");
         }
 
-        return new Property(propertyId, title, price, priceText, pricePerM2Text, description, address,
-                buildingName, district, city, floor, area, bedrooms, bathrooms, direction, legalStatus,
-                status, thumbnail, images, listingType);
+        property.setDescription(emptyIfNull(rs.getString("description")));
+        property.setAddress(emptyIfNull(rs.getString("address")));
+        property.setBuildingName(emptyIfNull(rs.getString("building_name")));
+        property.setDistrict(emptyIfNull(rs.getString("district")));
+        property.setCity(emptyIfNull(rs.getString("city")));
+        property.setFloor(rs.getInt("floor_number"));
+        // NUMERIC 75.50 -> "75.5"
+        property.setArea(rs.getBigDecimal("area").stripTrailingZeros().toPlainString());
+        property.setBedrooms(rs.getInt("bedrooms"));
+        property.setBathrooms(rs.getInt("bathrooms"));
+        property.setDirection(emptyIfNull(rs.getString("direction")));
+        property.setLegalStatus(emptyIfNull(rs.getString("legal_status")));
+        property.setStatus(rs.getString("status"));
+        property.setThumbnailUrl(Property.imageUrl(rs.getString("thumb")));
+        property.setImageUrls(images);
+        property.setListingType(rs.getString("listing_type"));
+        return property;
     }
 
     private static String emptyIfNull(String value) {

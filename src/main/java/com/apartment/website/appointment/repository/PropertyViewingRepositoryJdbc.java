@@ -232,12 +232,12 @@ public class PropertyViewingRepositoryJdbc implements PropertyViewingRepository 
 
         // customer_name / customer_phone có thể NULL (dữ liệu mẫu) -> lấy tên, SĐT trong tài khoản khách
         String customerName = rs.getString("customer_name");
-        if (customerName == null || customerName.isBlank()) {
+        if (customerName == null || customerName.trim().isEmpty()) {
             customerName = rs.getString("customer_full_name");
         }
         viewing.setCustomerName(customerName);
         String customerPhone = rs.getString("customer_phone");
-        if (customerPhone == null || customerPhone.isBlank()) {
+        if (customerPhone == null || customerPhone.trim().isEmpty()) {
             customerPhone = rs.getString("customer_user_phone");
         }
         viewing.setCustomerPhone(customerPhone);

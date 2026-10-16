@@ -1,11 +1,15 @@
 -- =====================================================================
 -- seed_owners.sql  -  chạy SAU KHI restore apartment_db.sql
 --  0. Sửa lỗi trigger check_admin_actor (không INSERT được vào listings, admin_activity_logs)
---  1. Đặt mật khẩu (lưu thẳng, không băm) cho 6 tài khoản mẫu
+--  1. Đặt mật khẩu (đã băm BCrypt) cho 6 tài khoản mẫu
 --  2. Thêm 8 chủ căn hộ mới -> tổng cộng 10 chủ căn hộ
 --  3. Chia đều 101 căn hộ cho 10 chủ (mỗi người ~10 căn)
 --  4. Cập nhật owner_id của listings và property_viewings cho khớp
 -- Mật khẩu của TẤT CẢ tài khoản: Matkhau123  (đăng nhập bằng số điện thoại hoặc email)
+-- Cột password_hash KHÔNG lưu chữ "Matkhau123" mà lưu chuỗi băm BCrypt của nó:
+--   $2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.
+--   ($2a = BCrypt, $10 = 2^10 vòng băm, 22 ký tự kế tiếp là salt, phần còn lại là hash)
+-- Chuỗi này tạo bằng PasswordHasher.hashPassword("Matkhau123") trong Java.
 -- Chạy lại nhiều lần vẫn được (không tạo trùng tài khoản).
 -- =====================================================================
 BEGIN;
@@ -36,24 +40,30 @@ BEGIN
  RETURN NEW;
 END $$;
 
--- 1. Mật khẩu cho 6 tài khoản mẫu (admin, 3 khách, 2 chủ căn hộ)
+-- 1. Mật khẩu (đã băm) cho 6 tài khoản mẫu (admin, 3 khách, 2 chủ căn hộ)
 UPDATE users
-SET password_hash = 'Matkhau123',
+SET password_hash = '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.',
     updated_at = CURRENT_TIMESTAMP
 WHERE phone IN ('0900000001', '0900000002', '0900000003', '0900000004', '0900000005', '0900000006');
 
 -- 2. Thêm 8 chủ căn hộ mới (username phải bằng phone - CHECK chk_username_equals_phone)
 INSERT INTO users (username, email, password_hash, role, full_name, phone)
 VALUES
-    ('0900000007', 'owner03@gmail.com', 'Matkhau123', 'OWNER', 'Lê Thị Mai',       '0900000007'),
-    ('0900000008', 'owner04@gmail.com', 'Matkhau123', 'OWNER', 'Phạm Quốc Bảo',    '0900000008'),
-    ('0900000009', 'owner05@gmail.com', 'Matkhau123', 'OWNER', 'Võ Thanh Tâm',     '0900000009'),
-    ('0900000010', 'owner06@gmail.com', 'Matkhau123', 'OWNER', 'Đặng Minh Khoa',   '0900000010'),
-    ('0900000011', 'owner07@gmail.com', 'Matkhau123', 'OWNER', 'Huỳnh Ngọc Hân',   '0900000011'),
-    ('0900000012', 'owner08@gmail.com', 'Matkhau123', 'OWNER', 'Bùi Gia Huy',      '0900000012'),
-    ('0900000013', 'owner09@gmail.com', 'Matkhau123', 'OWNER', 'Ngô Thùy Linh',    '0900000013'),
-    ('0900000014', 'owner10@gmail.com', 'Matkhau123', 'OWNER', 'Trịnh Đức Anh',    '0900000014')
+    ('0900000007', 'owner03@gmail.com', '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.', 'OWNER', 'Lê Thị Mai',       '0900000007'),
+    ('0900000008', 'owner04@gmail.com', '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.', 'OWNER', 'Phạm Quốc Bảo',    '0900000008'),
+    ('0900000009', 'owner05@gmail.com', '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.', 'OWNER', 'Võ Thanh Tâm',     '0900000009'),
+    ('0900000010', 'owner06@gmail.com', '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.', 'OWNER', 'Đặng Minh Khoa',   '0900000010'),
+    ('0900000011', 'owner07@gmail.com', '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.', 'OWNER', 'Huỳnh Ngọc Hân',   '0900000011'),
+    ('0900000012', 'owner08@gmail.com', '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.', 'OWNER', 'Bùi Gia Huy',      '0900000012'),
+    ('0900000013', 'owner09@gmail.com', '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.', 'OWNER', 'Ngô Thùy Linh',    '0900000013'),
+    ('0900000014', 'owner10@gmail.com', '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.', 'OWNER', 'Trịnh Đức Anh',    '0900000014')
 ON CONFLICT DO NOTHING;
+
+-- 8 chủ mới nếu đã tạo từ lần chạy trước (còn lưu mật khẩu chưa băm) thì cập nhật luôn
+UPDATE users
+SET password_hash = '$2a$10$BAGLuloAP/v2fxLcwyN/y.Q0mZ9Z0EuvYTDEj8LaAkSxqXGN3J7Q.'
+WHERE phone BETWEEN '0900000007' AND '0900000014'
+  AND password_hash NOT LIKE '$2%';
 
 -- mỗi tài khoản OWNER phải có 1 dòng trong bảng owners
 INSERT INTO owners (owner_id)

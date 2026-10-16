@@ -1,6 +1,7 @@
 package com.apartment.website.user.service;
 
 import com.apartment.website.common.exception.AuthException;
+import com.apartment.website.common.util.PasswordHasher;
 import com.apartment.website.user.dto.RegisterRequest;
 import com.apartment.website.user.entity.Customer;
 import com.apartment.website.user.entity.Owner;
@@ -16,7 +17,8 @@ public class AuthService {
     private static final int MAX_FULL_NAME = 150;
     private static final int MAX_EMAIL = 150;
     private static final int MIN_PASSWORD = 8;
-    private static final int MAX_PASSWORD = 100;
+    // BCrypt chỉ dùng tối đa 72 byte đầu của mật khẩu
+    private static final int MAX_PASSWORD = 72;
 
     private final UserRepository repository;
 
@@ -32,9 +34,9 @@ public class AuthService {
         }
 
         User user = repository.findByPhoneOrEmail(identifier);
-        // mật khẩu lưu thẳng trong cột users.password_hash -> so sánh trực tiếp với mật khẩu vừa nhập.
+        // cột users.password_hash lưu chuỗi đã băm BCrypt -> băm mật khẩu vừa nhập rồi so với chuỗi đó.
         // Không nói rõ sai SĐT hay sai mật khẩu để người lạ không dò được tài khoản
-        if (user == null || !password.equals(user.getPasswordHash())) {
+        if (user == null || !PasswordHasher.checkPassword(password, user.getPasswordHash())) {
             throw new AuthException("Số điện thoại/email hoặc mật khẩu không đúng.");
         }
         if (!user.isActive()) {
@@ -121,8 +123,8 @@ public class AuthService {
             user.setCccd(cccd);
         }
         user.setEmail(email);
-        // lưu thẳng mật khẩu vào cột users.password_hash (bài tập trên lớp, không băm)
-        user.setPasswordHash(password);
+        // băm mật khẩu bằng BCrypt rồi mới lưu vào cột users.password_hash (không lưu mật khẩu gốc)
+        user.setPasswordHash(PasswordHasher.hashPassword(password));
         user.setActive(true);
 
         long userId = repository.create(user);

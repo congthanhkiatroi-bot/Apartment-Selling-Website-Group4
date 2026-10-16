@@ -1,33 +1,43 @@
 package com.apartment.website.interaction.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Tổng hợp đánh giá của 1 căn: điểm trung bình, số lượt, và số lượt theo từng mức sao (để vẽ thanh 5★ ... 1★).
- * Class có getter để JSP đọc được: ${reviewSummary.averageText} -> getAverageText().
+ * JavaBean: tổng hợp đánh giá của 1 căn: điểm trung bình, số lượt, và số lượt theo từng mức sao (để vẽ thanh 5★ ... 1★).
+ * JSP đọc qua getter: ${reviewSummary.averageText} -> getAverageText().
  */
 public class ReviewSummary {
-    private final double average;
-    private final int count;
-    private final List<StarRow> rows;
+    private double average;
+    private int count;
+    private List<StarRow> rows = new ArrayList<StarRow>();
 
-    public ReviewSummary(double average, int count, List<StarRow> rows) {
-        this.average = average;
-        this.count = count;
-        this.rows = rows;
+    public ReviewSummary() {
     }
 
     public double getAverage() {
         return average;
     }
 
+    public void setAverage(double average) {
+        this.average = average;
+    }
+
     public int getCount() {
         return count;
     }
 
+    public void setCount(int count) {
+        this.count = count;
+    }
+
     public List<StarRow> getRows() {
         return rows;
+    }
+
+    public void setRows(List<StarRow> rows) {
+        this.rows = rows;
     }
 
     /** 4.666 -> "4.7" */
@@ -38,32 +48,48 @@ public class ReviewSummary {
     /** Làm tròn điểm trung bình thành chuỗi sao: 4.3 -> "★★★★☆" */
     public String getStars() {
         int full = (int) Math.round(average);
-        int empty = 5 - full;
-        return "★".repeat(full) + "☆".repeat(empty);
+        StringBuilder stars = new StringBuilder();
+        for (int i = 1; i <= 5; i++) {
+            if (i <= full) {
+                stars.append("★");
+            } else {
+                stars.append("☆");
+            }
+        }
+        return stars.toString();
     }
 
-    /** 1 dòng "5★ ▓▓▓▓░ 3": star = số sao, count = số lượt, percent = độ dài thanh (0-100). */
+    /** JavaBean: 1 dòng "5★ ▓▓▓▓░ 3": star = số sao, count = số lượt, percent = độ dài thanh (0-100). */
     public static class StarRow {
-        private final int star;
-        private final int count;
-        private final int percent;
+        private int star;
+        private int count;
+        private int percent;
 
-        public StarRow(int star, int count, int percent) {
-            this.star = star;
-            this.count = count;
-            this.percent = percent;
+        public StarRow() {
         }
 
         public int getStar() {
             return star;
         }
 
+        public void setStar(int star) {
+            this.star = star;
+        }
+
         public int getCount() {
             return count;
         }
 
+        public void setCount(int count) {
+            this.count = count;
+        }
+
         public int getPercent() {
             return percent;
+        }
+
+        public void setPercent(int percent) {
+            this.percent = percent;
         }
     }
 }

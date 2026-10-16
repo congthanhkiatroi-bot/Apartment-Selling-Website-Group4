@@ -1,7 +1,6 @@
 package com.apartment.website.common.controller;
 
 import com.apartment.website.config.Database;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,7 +13,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /** TẠM THỜI - mở /db-check để kiểm tra kết nối PostgreSQL. Kiểm tra xong thì XÓA file này. */
-@WebServlet("/db-check")
 public class DbCheckServlet extends HttpServlet {
     private static final String[] TABLES = {
             "users", "customers", "owners", "buildings", "apartments", "properties",

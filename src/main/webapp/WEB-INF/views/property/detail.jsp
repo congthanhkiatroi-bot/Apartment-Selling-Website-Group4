@@ -20,7 +20,8 @@
         <img class="gallery__main" src="<c:url value='${mainImage}'/>" alt="<c:out value="${property.title}"/>">
         <!-- bấm ảnh nhỏ = tải lại trang với ?img=số (không cần JavaScript) -->
         <div class="gallery__thumbs">
-          <c:forEach var="it" items="${images}"><a href="<c:out value="${it.href}"/>"><img class="gallery__thumb <c:out value="${it.active}"/>" src="<c:url value='${it.url}'/>" alt=""></a></c:forEach>
+          <%-- images: List<String> đường dẫn ảnh; selectedImage: vị trí ảnh đang xem; st.index = 0, 1, 2... --%>
+          <c:forEach var="url" items="${images}" varStatus="st"><a href="${ctx}/properties?action=detail&amp;id=${property.propertyId}&amp;img=${st.index}"><img class="gallery__thumb ${st.index == selectedImage ? 'is-active' : ''}" src="<c:url value='${url}'/>" alt=""></a></c:forEach>
         </div>
       </section>
 
@@ -95,7 +96,7 @@
               <div class="star-input" role="radiogroup" aria-label="Số sao">
                 <c:forEach var="s" begin="1" end="5">
                   <c:set var="star" value="${6 - s}"/>
-                  <input type="radio" id="star${star}" name="rating" value="${star}" ${reviewForm.rating == ('' += star) ? 'checked' : ''}>
+                  <input type="radio" id="star${star}" name="rating" value="${star}" ${reviewForm.rating == star ? 'checked' : ''}>
                   <label for="star${star}" title="${star} sao">★</label>
                 </c:forEach>
               </div>

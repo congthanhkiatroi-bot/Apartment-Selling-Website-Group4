@@ -7,7 +7,6 @@ import com.apartment.website.notification.entity.Notification;
 import com.apartment.website.notification.service.NotificationService;
 import com.apartment.website.user.entity.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +20,6 @@ import java.util.List;
  *  POST /notifications  (action=read, id)   -> đánh dấu đã đọc, mở lịch hẹn liên quan
  *  POST /notifications  (action=readAll)    -> đánh dấu đã đọc tất cả
  */
-@WebServlet("/notifications")
 public class NotificationServlet extends HttpServlet {
     private NotificationService notificationService;
 

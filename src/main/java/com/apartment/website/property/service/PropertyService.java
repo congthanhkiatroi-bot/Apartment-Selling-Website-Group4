@@ -1,11 +1,13 @@
 package com.apartment.website.property.service;
 
+import com.apartment.website.property.dto.PageLink;
 import com.apartment.website.property.dto.PageResult;
 import com.apartment.website.property.dto.PropertyFilter;
 import com.apartment.website.property.entity.Property;
 import com.apartment.website.property.repository.PropertyRepository;
 import com.apartment.website.user.entity.Owner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** Logic nghiệp vụ về căn hộ. */
@@ -38,9 +40,54 @@ public class PropertyService {
         return repository.search(filter, page, size);
     }
 
+    /**
+     * Các nút phân trang « 1 … 4 5 6 … 12 »: luôn có trang đầu, trang cuối và 2 trang quanh trang hiện tại.
+     * baseUrl kết thúc bằng "&page=" để chỉ cần nối thêm số trang.
+     */
+    public List<PageLink> pageLinks(String baseUrl, int current, int total) {
+        List<PageLink> links = new ArrayList<PageLink>();
+
+        String previousHref = null;
+        if (current > 1) {
+            previousHref = baseUrl + (current - 1);
+        }
+        links.add(createLink("«", previousHref, false));
+
+        int lastShown = 0;
+        for (int i = 1; i <= total; i++) {
+            boolean isFirstOrLast = (i == 1 || i == total);
+            boolean nearCurrent = Math.abs(i - current) <= 2;
+            if (!isFirstOrLast && !nearCurrent) {
+                continue;
+            }
+            // có khoảng trống giữa 2 số trang -> chèn dấu …
+            if (i - lastShown > 1) {
+                links.add(createLink("…", null, false));
+            }
+            links.add(createLink(String.valueOf(i), baseUrl + i, i == current));
+            lastShown = i;
+        }
+
+        String nextHref = null;
+        if (current < total) {
+            nextHref = baseUrl + (current + 1);
+        }
+        links.add(createLink("»", nextHref, false));
+        return links;
+    }
+
+    private static PageLink createLink(String label, String href, boolean active) {
+        PageLink link = new PageLink();
+        link.setLabel(label);
+        link.setHref(href);
+        link.setActive(active);
+        return link;
+    }
+
     /** Các căn mới nhất cho trang chủ. */
     public List<Property> featured(int count) {
-        PropertyFilter noFilter = new PropertyFilter("", "", null, "");
+        // bean rỗng = không lọc gì, mặc định lấy căn BÁN
+        PropertyFilter noFilter = new PropertyFilter();
         PageResult<Property> firstPage = repository.search(noFilter, 1, count);
         return firstPage.getItems();
     }

@@ -4,11 +4,11 @@ import com.apartment.website.common.exception.ListingException;
 import com.apartment.website.common.filter.AuthFilter;
 import com.apartment.website.common.util.View;
 import com.apartment.website.config.AppContextListener;
+import com.apartment.website.listing.dto.FormField;
 import com.apartment.website.listing.entity.Listing;
 import com.apartment.website.listing.service.ListingService;
 import com.apartment.website.user.entity.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Trang "Quản lý tin" (cần đăng nhập, AuthFilter đã kiểm tra):
@@ -33,7 +32,6 @@ import java.util.Map;
  *   POST /postings  (action=delete, id, reason, q) -> xóa căn đăng sai mô tả
  *  Khách hàng: 403.
  */
-@WebServlet("/postings")
 public class ListingServlet extends HttpServlet {
     /** Câu thông báo xanh hiện 1 lần sau khi xóa (lưu tạm trong session). */
     private static final String FLASH = "listingFlash";
@@ -153,12 +151,22 @@ public class ListingServlet extends HttpServlet {
 
         // TODO (backend): gom request.getParameter("title"), ("price")... -> ListingService.create(...) -> lưu DB
         // (tin đăng xong hiện luôn, không cần duyệt), rồi response.sendRedirect(... "/postings").
-        List<Map<String, Object>> fields = new ArrayList<Map<String, Object>>();
-        Map<String, String[]> parameters = request.getParameterMap();
-        for (Map.Entry<String, String[]> entry : parameters.entrySet()) {
-            Map<String, Object> field = new HashMap<String, Object>();
-            field.put("name", entry.getKey());
-            field.put("value", String.join(", ", entry.getValue()));
+        List<FormField> fields = new ArrayList<FormField>();
+        Enumeration<String> names = request.getParameterNames();
+        while (names.hasMoreElements()) {
+            String name = names.nextElement();
+            // 1 ô có thể gửi nhiều giá trị (checkbox) -> tự nối bằng dấu phẩy
+            String[] values = request.getParameterValues(name);
+            String value = "";
+            for (int i = 0; i < values.length; i++) {
+                if (i > 0) {
+                    value = value + ", ";
+                }
+                value = value + values[i];
+            }
+            FormField field = new FormField();
+            field.setName(name);
+            field.setValue(value);
             fields.add(field);
         }
 

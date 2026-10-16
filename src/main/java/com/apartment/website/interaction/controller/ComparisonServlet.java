@@ -5,7 +5,6 @@ import com.apartment.website.config.AppContextListener;
 import com.apartment.website.property.entity.Property;
 import com.apartment.website.property.service.PropertyService;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,7 +21,6 @@ import java.util.List;
  *  POST action=remove&id=5  -> bỏ căn 5
  *  POST action=clear        -> xóa hết
  */
-@WebServlet("/comparisons")
 public class ComparisonServlet extends HttpServlet {
     public static final int MAX_ITEMS = 3;
     private static final String SESSION_KEY = "compareIds";

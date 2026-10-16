@@ -9,7 +9,6 @@ import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -24,7 +23,6 @@ import java.nio.charset.StandardCharsets;
  *  2. Đếm thông báo chưa đọc -> "unreadCount" (số đỏ trên cái chuông).
  *  3. Trang cần đăng nhập (/viewings, /notifications, /postings) mà chưa đăng nhập -> chuyển tới trang đăng nhập.
  */
-@WebFilter("/*")
 public class AuthFilter implements Filter {
     /** Tên attribute lưu User trong session. */
     public static final String SESSION_USER = "loginUser";

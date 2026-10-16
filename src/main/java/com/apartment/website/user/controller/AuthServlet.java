@@ -8,26 +8,27 @@ import com.apartment.website.user.dto.RegisterRequest;
 import com.apartment.website.user.entity.User;
 import com.apartment.website.user.service.AuthService;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
- * Điều hướng bằng tham số action:
+ * Điều hướng bằng tham số action (URL /auth khai báo trong web.xml):
  *  GET  /auth?action=login               -> form đăng nhập        -> views/auth/login.jsp
  *  GET  /auth?action=register&role=OWNER -> form đăng ký          -> views/auth/register.jsp
  *  GET  /auth?action=logout              -> đăng xuất, về trang chủ
  *  POST /auth  (action=login | register) -> kiểm tra, lưu User vào session, chuyển về trang trước đó (?next=)
+ * Trạng thái đăng nhập lưu bằng Session ("loginUser"); ô "Ghi nhớ" lưu SĐT/email bằng Cookie "rememberPhone".
  */
-@WebServlet("/auth")
 public class AuthServlet extends HttpServlet {
-    private static final String[] REGISTER_FIELDS = {"role", "fullName", "phone", "cccd", "email"};
+    // tên cookie ghi nhớ SĐT / email ở trang đăng nhập
+    public static final String REMEMBER_COOKIE = "rememberPhone";
+    // 30 ngày tính bằng giây
+    private static final int REMEMBER_SECONDS = 30 * 24 * 60 * 60;
 
     private AuthService authService;
 
@@ -49,15 +50,22 @@ public class AuthServlet extends HttpServlet {
             return;
         }
         if ("register".equals(action)) {
-            Map<String, String> form = new HashMap<String, String>();
+            // JavaBean rỗng cho form đăng ký, chọn sẵn vai trò theo ?role=
+            RegisterRequest form = new RegisterRequest();
             if (User.ROLE_OWNER.equals(request.getParameter("role"))) {
-                form.put("role", User.ROLE_OWNER);
+                form.setRole(User.ROLE_OWNER);
             } else {
-                form.put("role", User.ROLE_CUSTOMER);
+                form.setRole(User.ROLE_CUSTOMER);
             }
             request.setAttribute("form", form);
             showRegister(request, response);
         } else {
+            // mở trang đăng nhập: đọc cookie để điền sẵn SĐT / email đã ghi nhớ
+            String rememberedPhone = readCookie(request, REMEMBER_COOKIE);
+            if (rememberedPhone != null) {
+                request.setAttribute("phoneOrEmail", rememberedPhone);
+                request.setAttribute("remember", true);
+            }
             showLogin(request, response);
         }
     }
@@ -79,36 +87,40 @@ public class AuthServlet extends HttpServlet {
     // ===================== action=login =====================
 
     private void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String phoneOrEmail = request.getParameter("phoneOrEmail");
+        String phoneOrEmail = getText(request, "phoneOrEmail").trim();
         String password = request.getParameter("password");
+        boolean remember = "1".equals(request.getParameter("remember"));
         try {
             User user = authService.login(phoneOrEmail, password);
             saveToSession(request, user);
+            saveRememberCookie(request, response, phoneOrEmail, remember);
             response.sendRedirect(nextUrl(request));
             return;
         } catch (AuthException e) {
             request.setAttribute("error", e.getMessage());
         }
         // sai -> hiện lại form, giữ ô SĐT/email (không giữ mật khẩu)
-        Map<String, String> form = new HashMap<String, String>();
-        form.put("phoneOrEmail", getText(request, "phoneOrEmail"));
-        request.setAttribute("form", form);
+        request.setAttribute("phoneOrEmail", phoneOrEmail);
+        request.setAttribute("remember", remember);
         showLogin(request, response);
     }
 
     // ===================== action=register =====================
 
     private void register(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        RegisterRequest registerRequest = new RegisterRequest(
-                request.getParameter("role"),
-                request.getParameter("fullName"),
-                request.getParameter("phone"),
-                request.getParameter("cccd"),
-                request.getParameter("email"),
-                request.getParameter("password"),
-                request.getParameter("confirmPassword"));
+        // 1. Đọc form vào JavaBean RegisterRequest
+        RegisterRequest form = new RegisterRequest();
+        form.setRole(request.getParameter("role"));
+        form.setFullName(request.getParameter("fullName"));
+        form.setPhone(request.getParameter("phone"));
+        form.setCccd(request.getParameter("cccd"));
+        form.setEmail(request.getParameter("email"));
+        form.setPassword(request.getParameter("password"));
+        form.setConfirmPassword(request.getParameter("confirmPassword"));
+
+        // 2. Gọi Service kiểm tra + lưu
         try {
-            User user = authService.register(registerRequest);
+            User user = authService.register(form);
             // đăng ký xong thì đăng nhập luôn
             saveToSession(request, user);
             response.sendRedirect(nextUrl(request));
@@ -116,12 +128,10 @@ public class AuthServlet extends HttpServlet {
         } catch (AuthException e) {
             request.setAttribute("error", e.getMessage());
         }
-        // sai -> hiện lại form, giữ những gì đã nhập (trừ mật khẩu)
-        Map<String, String> form = new HashMap<String, String>();
-        for (int i = 0; i < REGISTER_FIELDS.length; i++) {
-            String field = REGISTER_FIELDS[i];
-            form.put(field, getText(request, field));
-        }
+
+        // 3. Sai -> hiện lại form bằng chính bean đó (xóa mật khẩu, không gửi ngược ra trang)
+        form.setPassword(null);
+        form.setConfirmPassword(null);
         request.setAttribute("form", form);
         showRegister(request, response);
     }
@@ -153,6 +163,49 @@ public class AuthServlet extends HttpServlet {
         HttpSession session = request.getSession(true);
         request.changeSessionId();
         session.setAttribute(AuthFilter.SESSION_USER, user);
+    }
+
+    /**
+     * Có tick "Ghi nhớ" -> tạo cookie rememberPhone sống 30 ngày.
+     * Không tick -> gửi cookie cùng tên với maxAge = 0 để trình duyệt xóa cookie cũ.
+     */
+    private static void saveRememberCookie(HttpServletRequest request, HttpServletResponse response,
+                                           String phoneOrEmail, boolean remember) {
+        Cookie cookie = new Cookie(REMEMBER_COOKIE, phoneOrEmail);
+        if (remember) {
+            cookie.setMaxAge(REMEMBER_SECONDS);
+        } else {
+            cookie.setValue("");
+            cookie.setMaxAge(0);
+        }
+        // cookie chỉ gửi kèm các trang của web này
+        String path = request.getContextPath();
+        if (path.isEmpty()) {
+            path = "/";
+        }
+        cookie.setPath(path);
+        // JavaScript trên trang không đọc được cookie này
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+    }
+
+    /** Đọc giá trị 1 cookie theo tên; không có thì trả về null. */
+    private static String readCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (int i = 0; i < cookies.length; i++) {
+            Cookie cookie = cookies[i];
+            if (name.equals(cookie.getName())) {
+                String value = cookie.getValue();
+                if (value == null || value.trim().isEmpty()) {
+                    return null;
+                }
+                return value;
+            }
+        }
+        return null;
     }
 
     /** Trang cần quay lại sau khi đăng nhập; không có thì về trang chủ. */

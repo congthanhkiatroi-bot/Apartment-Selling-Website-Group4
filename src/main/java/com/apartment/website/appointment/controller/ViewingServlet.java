@@ -8,7 +8,6 @@ import com.apartment.website.common.util.View;
 import com.apartment.website.config.AppContextListener;
 import com.apartment.website.user.entity.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,7 +24,6 @@ import java.util.List;
  *  POST /viewings  (action=confirm|reject|complete|cancel, id=<viewing_id>, reason=...)
  *       -> đổi trạng thái, gửi thông báo cho bên còn lại, rồi redirect về GET
  */
-@WebServlet("/viewings")
 public class ViewingServlet extends HttpServlet {
     /** Câu thông báo xanh hiện 1 lần sau khi redirect (lưu tạm trong session). */
     private static final String FLASH = "viewingFlash";

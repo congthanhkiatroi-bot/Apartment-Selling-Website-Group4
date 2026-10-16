@@ -14,6 +14,8 @@
 .auth-main h2{margin-bottom:24px;font-size:36px}
 .auth-input{width:100%;margin-bottom:16px;padding:15px 18px;border:2px solid #dcdfe4;border-radius:10px;background:#f7f8fa;font:inherit;font-size:16px;transition:border-color .15s,background .15s}
 .auth-input:focus{outline:none;border-color:var(--green);background:#fff}
+.auth-remember{display:flex;align-items:center;gap:8px;margin:-4px 0 16px;font-size:14px;color:#5c6470;cursor:pointer}
+.auth-remember input{width:16px;height:16px;accent-color:var(--green)}
 .auth-submit{width:100%;margin-top:8px;padding:16px;border:0;border-radius:10px;background:#246b4b;color:#fff;font:inherit;font-size:17px;font-weight:800;cursor:pointer;transition:background .15s}
 .auth-submit:hover{background:#1c5a3e}
 .auth-submit:focus-visible{outline:3px solid #9fd8b8;outline-offset:2px}

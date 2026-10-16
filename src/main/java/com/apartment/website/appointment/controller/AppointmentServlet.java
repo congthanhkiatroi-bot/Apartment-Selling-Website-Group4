@@ -8,13 +8,13 @@ import com.apartment.website.appointment.service.AppointmentService;
 import com.apartment.website.common.exception.BookingException;
 import com.apartment.website.common.exception.SlotTakenException;
 import com.apartment.website.common.filter.AuthFilter;
+import com.apartment.website.common.util.DateText;
 import com.apartment.website.common.util.View;
 import com.apartment.website.config.AppContextListener;
 import com.apartment.website.property.entity.Property;
 import com.apartment.website.property.service.PropertyService;
 import com.apartment.website.user.entity.User;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -24,26 +24,17 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * /appointments?propertyId=1&month=2026-11&date=2026-11-05&time=09:30
+ * /appointments?propertyId=1&month=2026-11&date=2026-11-05&time=09:30  (khai báo trong web.xml)
  *  GET  : vẽ lịch, khung giờ, form. Chọn ngày / giờ = bấm vào liên kết (đổi tham số trên URL), không cần JavaScript.
  *         Ai cũng xem được lịch trống; chỉ KHÁCH HÀNG đã đăng nhập mới thấy form đặt lịch.
  *  POST : khách gửi form -> kiểm tra -> lưu vào property_viewings (Chờ xác nhận) -> báo cho chủ căn hộ
  *         -> chuyển hướng về GET kèm &booked=<viewing_id>.
+ * Servlet chỉ đọc tham số, gọi AppointmentService và chuyển sang JSP; việc tính lịch / khung giờ nằm ở Service và JavaBean.
  */
-@WebServlet("/appointments")
 public class AppointmentServlet extends HttpServlet {
-    private static final String[] DAY_OF_WEEK = {"Thứ hai", "Thứ ba", "Thứ tư", "Thứ năm", "Thứ sáu", "Thứ bảy", "Chủ nhật"};
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final String[] FORM_FIELDS = {"customerName", "customerPhone", "note"};
-
     private AppointmentService appointmentService;
     private PropertyService propertyService;
 
@@ -73,14 +64,16 @@ public class AppointmentServlet extends HttpServlet {
             return;
         }
 
-        BookingRequest booking = new BookingRequest(
-                propertyId,
-                getText(request, "date"),
-                getText(request, "time"),
-                getText(request, "customerName"),
-                getText(request, "customerPhone"),
-                getText(request, "note"));
+        // 1. Đọc form vào JavaBean BookingRequest
+        BookingRequest booking = new BookingRequest();
+        booking.setPropertyId(propertyId);
+        booking.setDate(getText(request, "date"));
+        booking.setTime(getText(request, "time"));
+        booking.setCustomerName(getText(request, "customerName"));
+        booking.setCustomerPhone(getText(request, "customerPhone"));
+        booking.setNote(getText(request, "note"));
 
+        // 2. Gọi Service kiểm tra + lưu
         try {
             long viewingId = appointmentService.book(booking, user);
             // redirect để F5 không gửi lại form
@@ -93,158 +86,68 @@ public class AppointmentServlet extends HttpServlet {
             request.setAttribute("error", e.getMessage());
         }
 
-        // giữ lại những gì người dùng đã nhập
-        Map<String, String> form = new HashMap<String, String>();
-        for (int i = 0; i < FORM_FIELDS.length; i++) {
-            String field = FORM_FIELDS[i];
-            form.put(field, getText(request, field));
-        }
-        request.setAttribute("form", form);
+        // 3. Sai -> hiện lại trang, gửi lại chính bean đó để giữ những gì người dùng đã nhập
+        request.setAttribute("form", booking);
         show(request, response);
     }
 
     private void show(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        // 1. Căn hộ cần đặt lịch
         Property property = findProperty(request);
         if (property == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         long propertyId = property.getPropertyId();
-
-        // ---- tháng và ngày đang xem ----
-        LocalDate today = appointmentService.today();
-        LocalDate maxDate = appointmentService.maxDate();
-        YearMonth currentMonth = YearMonth.from(today);
-        LocalDate selectedDate = parseDate(request.getParameter("date"));
-        YearMonth month;
-        if (selectedDate != null && !selectedDate.isBefore(today) && !selectedDate.isAfter(maxDate)) {
-            month = YearMonth.from(selectedDate);
-        } else {
-            selectedDate = null;
-            month = appointmentService.parseMonth(request.getParameter("month"));
-        }
-        // chưa chọn ngày: tháng này thì chọn hôm nay, tháng sau thì chọn ngày 1
-        if (selectedDate == null) {
-            if (month.equals(currentMonth)) {
-                selectedDate = today;
-            } else {
-                selectedDate = month.atDay(1);
-            }
-        }
-
         String baseUrl = request.getContextPath() + "/appointments?propertyId=" + propertyId;
 
-        // ---- lưới lịch (bắt đầu từ thứ 2) ----
-        List<Map<String, Object>> cells = new ArrayList<Map<String, Object>>();
-        int blankCells = month.atDay(1).getDayOfWeek().getValue() - 1;
-        for (int i = 0; i < blankCells; i++) {
-            Map<String, Object> blank = new HashMap<String, Object>();
-            blank.put("blank", true);
-            cells.add(blank);
-        }
-        List<DaySlot> days = appointmentService.month(propertyId, month);
-        for (int i = 0; i < days.size(); i++) {
-            DaySlot day = days.get(i);
-            String cssClass;
-            String label;
-            String href = null;
-            if (DaySlot.PAST.equals(day.getState())) {
-                cssClass = "is-past";
-                label = "Đã qua";
-            } else if (DaySlot.FULL.equals(day.getState())) {
-                cssClass = "is-full";
-                label = "Hết lịch";
-            } else if (DaySlot.FEW.equals(day.getState())) {
-                cssClass = "is-few";
-                label = "Ít chỗ";
-                href = baseUrl + "&date=" + day.getDate();
-            } else {
-                cssClass = "";
-                label = "Còn lịch";
-                href = baseUrl + "&date=" + day.getDate();
-            }
-            if (day.getDate().equals(selectedDate)) {
-                cssClass = cssClass + " is-selected";
-            }
+        // 2. Đọc ?date, ?month, ?time rồi nhờ Service tính lịch tháng + khung giờ
+        LocalDate selectedDate = appointmentService.chooseDate(request.getParameter("date"), request.getParameter("month"));
+        YearMonth month = YearMonth.from(selectedDate);
+        List<DaySlot> cells = appointmentService.calendar(propertyId, selectedDate, baseUrl);
+        List<SlotInfo> slots = appointmentService.timeSlots(propertyId, selectedDate, request.getParameter("time"), baseUrl);
+        String selectedTime = appointmentService.selectedTime(slots);
 
-            Map<String, Object> cell = new HashMap<String, Object>();
-            cell.put("day", day.getDate().getDayOfMonth());
-            cell.put("cls", cssClass.trim());
-            cell.put("label", label);
-            cell.put("href", href);
-            cells.add(cell);
+        // 3. Nút tháng trước / tháng sau (null = không bấm được)
+        String previousHref = null;
+        YearMonth previousMonth = appointmentService.previousMonth(month);
+        if (previousMonth != null) {
+            previousHref = baseUrl + "&month=" + previousMonth;
+        }
+        String nextHref = null;
+        YearMonth nextMonth = appointmentService.nextMonth(month);
+        if (nextMonth != null) {
+            nextHref = baseUrl + "&month=" + nextMonth;
         }
 
-        // ---- khung giờ của ngày đang chọn ----
-        String timeParam = request.getParameter("time");
-        String selectedTime = null;
-        List<Map<String, Object>> slots = new ArrayList<Map<String, Object>>();
-        List<SlotInfo> slotInfos = appointmentService.slots(propertyId, selectedDate);
-        for (int i = 0; i < slotInfos.size(); i++) {
-            SlotInfo slotInfo = slotInfos.get(i);
-            boolean selected = slotInfo.isAvailable() && slotInfo.getTime().equals(timeParam);
-            if (selected) {
-                selectedTime = slotInfo.getTime();
-            }
-
-            Map<String, Object> slot = new HashMap<String, Object>();
-            slot.put("time", slotInfo.getTime());
-            if (!slotInfo.isAvailable()) {
-                slot.put("cls", "is-disabled");
-                slot.put("href", null);
-            } else {
-                if (selected) {
-                    slot.put("cls", "is-selected");
-                } else {
-                    slot.put("cls", "");
-                }
-                slot.put("href", baseUrl + "&date=" + selectedDate + "&time=" + encode(slotInfo.getTime()));
-            }
-            slots.add(slot);
-        }
-
-        // ---- ai đang xem trang: khách (đặt được), chủ căn hộ / chưa đăng nhập (chỉ xem) ----
+        // 4. Ai đang xem trang: khách (đặt được), chủ căn hộ / chưa đăng nhập (chỉ xem)
         User user = AuthFilter.getLoginUser(request);
         boolean canBook = user != null && user.isCustomer();
         // lần đầu mở form: điền sẵn họ tên, SĐT trong tài khoản
         if (canBook && request.getAttribute("form") == null) {
-            Map<String, String> form = new HashMap<String, String>();
-            form.put("customerName", user.getFullName());
-            form.put("customerPhone", user.getPhone());
+            BookingRequest form = new BookingRequest();
+            form.setCustomerName(user.getFullName());
+            form.setCustomerPhone(user.getPhone());
             request.setAttribute("form", form);
         }
         String loginUrl = request.getContextPath() + "/auth?action=login&next="
                 + encode("/appointments?propertyId=" + propertyId);
 
-        // ---- lịch vừa đặt xong (hiện thông báo thành công) ----
+        // 5. Lịch vừa đặt xong (?booked=id): chỉ hiện cho đúng khách đã đặt lịch đó
         Long bookedId = toLong(request.getParameter("booked"));
         if (bookedId != null && user != null) {
             PropertyViewing viewing = appointmentService.findById(bookedId);
-            // chỉ hiện cho đúng khách đã đặt lịch đó
             if (viewing != null && viewing.getCustomerId() == user.getUserId()) {
-                Map<String, Object> booked = new HashMap<String, Object>();
-                booked.put("id", viewing.getViewingId());
-                booked.put("dateText", formatDate(viewing.getStartTime().toLocalDate()));
-                booked.put("time", viewing.getTimeText());
-                booked.put("status", viewing.getStatus());
-                request.setAttribute("booked", booked);
+                request.setAttribute("booked", viewing);
             }
         }
 
-        // ---- nút tháng trước / tháng sau (null = không bấm được) ----
-        String previousHref = null;
-        if (month.isAfter(currentMonth)) {
-            previousHref = baseUrl + "&month=" + month.minusMonths(1);
-        }
-        String nextHref = null;
-        if (month.isBefore(currentMonth.plusMonths(AppointmentService.MAX_MONTHS_AHEAD))) {
-            nextHref = baseUrl + "&month=" + month.plusMonths(1);
-        }
         String timeText = "Chưa chọn";
         if (selectedTime != null) {
             timeText = selectedTime;
         }
 
+        // 6. Gửi dữ liệu sang JSP
         request.setAttribute("active", "schedule");
         request.setAttribute("property", property);
         request.setAttribute("monthTitle", "Tháng " + month.getMonthValue() + ", " + month.getYear());
@@ -254,7 +157,7 @@ public class AppointmentServlet extends HttpServlet {
         request.setAttribute("slots", slots);
         request.setAttribute("selectedDate", selectedDate.toString());
         request.setAttribute("selectedTime", selectedTime);
-        request.setAttribute("dateText", formatDate(selectedDate));
+        request.setAttribute("dateText", DateText.fullDate(selectedDate));
         request.setAttribute("timeText", timeText);
         request.setAttribute("canBook", canBook);
         request.setAttribute("isOwnerViewer", user != null && user.isOwner());
@@ -274,23 +177,6 @@ public class AppointmentServlet extends HttpServlet {
             return null;
         }
         return featured.get(0);
-    }
-
-    /** 2026-11-05 -> "Thứ năm, 05/11/2026" */
-    private static String formatDate(LocalDate date) {
-        int dayIndex = date.getDayOfWeek().getValue() - 1;
-        return DAY_OF_WEEK[dayIndex] + ", " + date.format(DATE_FORMAT);
-    }
-
-    private static LocalDate parseDate(String text) {
-        if (text == null) {
-            return null;
-        }
-        try {
-            return LocalDate.parse(text);
-        } catch (DateTimeParseException e) {
-            return null;
-        }
     }
 
     private static Long toLong(String text) {

@@ -1,5 +1,7 @@
 package com.apartment.website.appointment.entity;
 
+import com.apartment.website.common.util.DateText;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -181,6 +183,14 @@ public class PropertyViewing {
             return "";
         }
         return startTime.format(DATE_FORMAT);
+    }
+
+    /** JSP: ${booked.fullDateText} -> "Thứ hai, 12/10/2026" */
+    public String getFullDateText() {
+        if (startTime == null) {
+            return "";
+        }
+        return DateText.fullDate(startTime.toLocalDate());
     }
 
     /** JSP: ${v.timeText} -> "09:00 - 09:30" */

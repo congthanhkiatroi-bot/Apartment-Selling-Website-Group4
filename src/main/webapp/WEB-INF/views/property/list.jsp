@@ -23,7 +23,8 @@
     <label class="filter-bar__item">Khu vực:
       <select class="input" name="district">
         <option value="">Tất cả</option>
-        <c:forEach var="it" items="${districts}"><option value="<c:out value="${it.value}"/>" <c:out value="${it.selected}"/>><c:out value="${it.value}"/></option></c:forEach>
+        <%-- districts: List<String>; district: quận đang chọn --%>
+        <c:forEach var="d" items="${districts}"><option value="<c:out value="${d}"/>" ${d == district ? 'selected' : ''}><c:out value="${d}"/></option></c:forEach>
       </select></label>
     <c:if test="${type != 'RENT'}">
     <label class="filter-bar__item">Mức giá:
@@ -73,6 +74,7 @@
 
   <c:if test="${empty totalPages or totalPages > 1}">
   <nav class="pagination" aria-label="Phân trang">
+    <%-- pages: List<PageLink> (JavaBean) do PropertyService.pageLinks() tạo --%>
     <c:forEach var="it" items="${pages}">
       <c:choose>
         <%-- href = null: « ở trang đầu, » ở trang cuối, dấu … -> không bấm được --%>

@@ -39,14 +39,22 @@ public class ReviewService {
             if (total > 0) {
                 percent = Math.round(countByStar[star] * 100f / total);
             }
-            rows.add(new ReviewSummary.StarRow(star, countByStar[star], percent));
+            ReviewSummary.StarRow row = new ReviewSummary.StarRow();
+            row.setStar(star);
+            row.setCount(countByStar[star]);
+            row.setPercent(percent);
+            rows.add(row);
         }
 
         double average = 0;
         if (total > 0) {
             average = (double) sum / total;
         }
-        return new ReviewSummary(average, total, rows);
+        ReviewSummary summary = new ReviewSummary();
+        summary.setAverage(average);
+        summary.setCount(total);
+        summary.setRows(rows);
+        return summary;
     }
 
     /**

@@ -107,8 +107,11 @@ public class AppointmentService {
         List<DaySlot> days = new ArrayList<DaySlot>();
         LocalDate day = firstDay;
         while (!day.isAfter(lastDay)) {
+            DaySlot slot = new DaySlot();
+            slot.setDate(day);
             if (day.isBefore(today)) {
-                days.add(new DaySlot(day, DaySlot.PAST, 0));
+                slot.setState(DaySlot.PAST);
+                slot.setFree(0);
             } else {
                 int free;
                 if (day.equals(today)) {
@@ -131,8 +134,10 @@ public class AppointmentService {
                 } else {
                     state = DaySlot.OPEN;
                 }
-                days.add(new DaySlot(day, state, free));
+                slot.setState(state);
+                slot.setFree(free);
             }
+            days.add(slot);
             day = day.plusDays(1);
         }
         return days;
@@ -169,9 +174,119 @@ public class AppointmentService {
                     overlap = true;
                 }
             }
-            result.add(new SlotInfo(time, !past && !overlap));
+            SlotInfo slot = new SlotInfo();
+            slot.setTime(time);
+            slot.setAvailable(!past && !overlap);
+            result.add(slot);
         }
         return result;
+    }
+
+    // ===================== DỮ LIỆU CHO TRANG ĐẶT LỊCH =====================
+
+    /**
+     * Ngày đang chọn trên lịch.
+     * ?date= hợp lệ (từ hôm nay tới maxDate) thì lấy ngày đó; không thì xem ?month=:
+     * tháng này -> chọn hôm nay, tháng sau -> chọn ngày 1 của tháng.
+     */
+    public LocalDate chooseDate(String dateText, String monthText) {
+        LocalDate today = today();
+        LocalDate selected = null;
+        if (dateText != null) {
+            try {
+                selected = LocalDate.parse(dateText);
+            } catch (DateTimeParseException e) {
+                selected = null;
+            }
+        }
+        if (selected != null && !selected.isBefore(today) && !selected.isAfter(maxDate())) {
+            return selected;
+        }
+
+        YearMonth month = parseMonth(monthText);
+        if (month.equals(YearMonth.from(today))) {
+            return today;
+        }
+        return month.atDay(1);
+    }
+
+    /**
+     * Các ô của lịch tháng chứa ngày đang chọn, bắt đầu từ thứ 2.
+     * Đầu tháng thêm các ô trống (blank) để ngày 1 rơi đúng cột thứ của nó.
+     * baseUrl = "/ctx/appointments?propertyId=5" để ghép link chọn ngày.
+     */
+    public List<DaySlot> calendar(long propertyId, LocalDate selectedDate, String baseUrl) {
+        YearMonth month = YearMonth.from(selectedDate);
+        List<DaySlot> cells = new ArrayList<DaySlot>();
+
+        // getDayOfWeek(): thứ 2 = 1 ... chủ nhật = 7
+        int blankCells = month.atDay(1).getDayOfWeek().getValue() - 1;
+        for (int i = 0; i < blankCells; i++) {
+            DaySlot blank = new DaySlot();
+            blank.setBlank(true);
+            cells.add(blank);
+        }
+
+        List<DaySlot> days = month(propertyId, month);
+        for (int i = 0; i < days.size(); i++) {
+            DaySlot day = days.get(i);
+            day.setSelected(day.getDate().equals(selectedDate));
+            if (day.isClickable()) {
+                day.setHref(baseUrl + "&date=" + day.getDate());
+            } else {
+                day.setHref(null);
+            }
+            cells.add(day);
+        }
+        return cells;
+    }
+
+    /**
+     * Khung giờ của ngày đang chọn kèm link chọn giờ.
+     * selectedTime là ?time= trên URL; chỉ được chọn nếu khung giờ đó còn trống.
+     */
+    public List<SlotInfo> timeSlots(long propertyId, LocalDate selectedDate, String selectedTime, String baseUrl) {
+        List<SlotInfo> result = slots(propertyId, selectedDate);
+        for (int i = 0; i < result.size(); i++) {
+            SlotInfo slot = result.get(i);
+            if (slot.isAvailable()) {
+                slot.setSelected(slot.getTime().equals(selectedTime));
+                slot.setHref(baseUrl + "&date=" + selectedDate + "&time=" + slot.getTime());
+            } else {
+                slot.setSelected(false);
+                slot.setHref(null);
+            }
+        }
+        return result;
+    }
+
+    /** Khung giờ đang được chọn (null nếu chưa chọn hoặc giờ đó đã hết chỗ). */
+    public String selectedTime(List<SlotInfo> slots) {
+        for (int i = 0; i < slots.size(); i++) {
+            SlotInfo slot = slots.get(i);
+            if (slot.isSelected()) {
+                return slot.getTime();
+            }
+        }
+        return null;
+    }
+
+    /** Tháng trước để bấm nút ‹ ; null nếu đang ở tháng hiện tại (không cho lùi về quá khứ). */
+    public YearMonth previousMonth(YearMonth month) {
+        YearMonth current = YearMonth.from(today());
+        if (month.isAfter(current)) {
+            return month.minusMonths(1);
+        }
+        return null;
+    }
+
+    /** Tháng sau để bấm nút › ; null nếu đã tới tháng xa nhất được đặt. */
+    public YearMonth nextMonth(YearMonth month) {
+        YearMonth last = YearMonth.from(today()).plusMonths(MAX_MONTHS_AHEAD);
+        if (month.isBefore(last)) {
+            return month.plusMonths(1);
+        }
+        return null;
     }
 
     // ===================== KHÁCH ĐẶT LỊCH =====================
