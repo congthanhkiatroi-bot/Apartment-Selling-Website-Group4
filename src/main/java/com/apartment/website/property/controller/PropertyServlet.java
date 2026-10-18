@@ -63,7 +63,7 @@ public class PropertyServlet extends HttpServlet {
         }
     }
 
-    // ===================== action=list =====================
+    //  action=list
 
     private void showList(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 1. Đọc các ô lọc trên URL

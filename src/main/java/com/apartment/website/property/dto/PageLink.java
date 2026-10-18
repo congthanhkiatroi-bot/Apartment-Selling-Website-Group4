@@ -1,7 +1,7 @@
 package com.apartment.website.property.dto;
 
 /**
- * JavaBean: 1 nút trong thanh phân trang « 1 … 4 5 6 … 12 ».
+ * 1 nút trong thanh phân trang « 1 … 4 5 6 … 12 ».
  * href = null nghĩa là không bấm được (« ở trang đầu, » ở trang cuối, dấu …).
  * list.jsp đọc: ${it.label}, ${it.href}, ${it.active}.
  */

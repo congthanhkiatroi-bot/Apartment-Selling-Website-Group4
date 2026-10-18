@@ -2,7 +2,7 @@ package com.apartment.website.property.entity;
 
 import java.time.LocalDateTime;
 
-/** JavaBean: ảnh của tin rao (bảng property_images). Diagram: Property 1 --- 0..* PropertyImage; isPrimary = is_thumbnail. */
+/** ảnh của tin rao (bảng property_images). Diagram: Property 1 --- 0..* PropertyImage; isPrimary = is_thumbnail. */
 public class PropertyImage {
     private long imageId;
     private long propertyId;
@@ -33,7 +33,6 @@ public class PropertyImage {
         return imageUrl;
     }
 
-    /** Chuẩn hóa đường dẫn ảnh (thêm dấu / ở đầu, không có ảnh thì dùng ảnh mặc định). */
     public void setImageUrl(String imageUrl) {
         this.imageUrl = Property.imageUrl(imageUrl);
     }
