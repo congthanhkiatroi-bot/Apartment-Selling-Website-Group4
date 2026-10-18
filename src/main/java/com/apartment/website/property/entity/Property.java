@@ -61,7 +61,6 @@ public class Property {
         this.price = price;
     }
 
-    /** Căn thuê thêm "/tháng" phía sau giá. */
     public String getPriceText() {
         if (isRent()) {
             return priceText + "/tháng";

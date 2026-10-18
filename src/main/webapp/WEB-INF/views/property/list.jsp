@@ -74,7 +74,7 @@
 
   <c:if test="${empty totalPages or totalPages > 1}">
   <nav class="pagination" aria-label="Phân trang">
-    <%-- pages: List<PageLink> (JavaBean) do PropertyService.pageLinks() tạo --%>
+    <%-- pages: List<PageLink>  do PropertyService.pageLinks() tạo --%>
     <c:forEach var="it" items="${pages}">
       <c:choose>
         <%-- href = null: « ở trang đầu, » ở trang cuối, dấu … -> không bấm được --%>

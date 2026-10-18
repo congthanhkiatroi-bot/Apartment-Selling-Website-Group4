@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * Cái chuông 🔔 (cần đăng nhập, AuthFilter đã kiểm tra):
- *  GET  /notifications                      -> danh sách thông báo -> views/notification/list.jsp
+ *  GET  /notifications                      -> danh sách thông báo -> views/notification/list-noti.jsp
  *  POST /notifications  (action=read, id)   -> đánh dấu đã đọc, mở lịch hẹn liên quan
  *  POST /notifications  (action=readAll)    -> đánh dấu đã đọc tất cả
  */
@@ -35,7 +35,7 @@ public class NotificationServlet extends HttpServlet {
 
         request.setAttribute("active", "notifications");
         request.setAttribute("notifications", notifications);
-        View.forward(request, response, "notification/list");
+        View.forward(request, response, "notification/list-noti");
     }
 
     @Override

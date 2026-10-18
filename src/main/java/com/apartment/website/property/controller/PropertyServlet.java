@@ -112,14 +112,13 @@ public class PropertyServlet extends HttpServlet {
                 + "&page=";
 
         // 5. Gửi dữ liệu sang JSP
-        request.setAttribute("active", "list");
-        request.setAttribute("type", type);
+        request.setAttribute("active", "list"); //bấm vô hiện danh sách chung cư
+        request.setAttribute("type", type); //
         request.setAttribute("properties", result.getItems());
         request.setAttribute("total", result.getTotal());
         request.setAttribute("noResult", result.getItems().isEmpty());
         request.setAttribute("districts", districts);
         request.setAttribute("district", district);
-        // "hiển thị from–to": PageResult (JavaBean) tự tính
         request.setAttribute("from", result.getFrom());
         request.setAttribute("to", result.getTo());
         request.setAttribute("totalPages", result.getTotalPages());
@@ -127,8 +126,7 @@ public class PropertyServlet extends HttpServlet {
         View.forward(request, response, "property/list");
     }
 
-    // ===================== action=detail =====================
-
+    //  action=detail
     private void showDetail(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         // 1. Lấy id trên URL rồi tìm căn
         Long id = toLong(request.getParameter("id"));
@@ -169,7 +167,7 @@ public class PropertyServlet extends HttpServlet {
         // 5. Đánh giá
         List<Review> reviews = reviewService.reviews(property.getPropertyId());
         ReviewSummary reviewSummary = reviewService.summary(reviews);
-        // form đánh giá (JavaBean Review): lần đầu mở trang thì mặc định chọn 5 sao
+        // form đánh giá: lần đầu mở trang thì mặc định chọn 5 sao
         if (request.getAttribute("reviewForm") == null) {
             Review defaultForm = new Review();
             defaultForm.setRating(Review.MAX_RATING);
@@ -193,7 +191,7 @@ public class PropertyServlet extends HttpServlet {
         View.forward(request, response, "property/detail");
     }
 
-    // ===================== action=review (POST) =====================
+    // action=review (POST)
 
     private void submitReview(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         Long id = toLong(request.getParameter("id"));
@@ -240,7 +238,7 @@ public class PropertyServlet extends HttpServlet {
         showDetail(request, response);
     }
 
-    // ===================== hàm phụ =====================
+    // hàm phụ
 
     /** Tham số không có thì trả về chuỗi rỗng thay vì null. */
     private static String getText(HttpServletRequest request, String name) {

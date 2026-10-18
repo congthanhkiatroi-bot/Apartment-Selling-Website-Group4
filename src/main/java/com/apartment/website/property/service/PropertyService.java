@@ -86,7 +86,6 @@ public class PropertyService {
 
     /** Các căn mới nhất cho trang chủ. */
     public List<Property> featured(int count) {
-        // bean rỗng = không lọc gì, mặc định lấy căn BÁN
         PropertyFilter noFilter = new PropertyFilter();
         PageResult<Property> firstPage = repository.search(noFilter, 1, count);
         return firstPage.getItems();

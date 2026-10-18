@@ -2,7 +2,7 @@ package com.apartment.website.property.dto;
 
 import java.math.BigDecimal;
 
-/** JavaBean: điều kiện lọc từ thanh lọc ở trang danh sách. type = "SALE" (mặc định) hoặc "RENT". */
+/**  điều kiện lọc từ thanh lọc ở trang danh sách. type = "SALE" hoặc "RENT". */
 public class PropertyFilter {
     private String keyword = "";
     private String district = "";
@@ -86,7 +86,7 @@ public class PropertyFilter {
         return null;
     }
 
-    /** Giá cao nhất (null = không giới hạn). */
+    /** Giá cao nhất */
     public BigDecimal getMaxPrice() {
         if (isRent()) {
             return null;
