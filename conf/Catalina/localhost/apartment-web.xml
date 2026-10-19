@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Context docBase="C:/Users/PC/Downloads/Apartment-Selling-Website-Group4-tp-2026-10-15/Apartment-Selling-Website-Group4-tp-2026-10-15/src/main/webapp">
+  <Resources cacheMaxSize="10240">
+    <PreResources base="C:/Users/PC/Downloads/Apartment-Selling-Website-Group4-tp-2026-10-15/Apartment-Selling-Website-Group4-tp-2026-10-15/target/classes" className="org.apache.catalina.webresources.DirResourceSet" webAppMount="/WEB-INF/classes"/>
+    <PostResources base="C:/Users/PC/.m2/repository/jakarta/servlet/jsp/jstl/jakarta.servlet.jsp.jstl-api/3.0.0/jakarta.servlet.jsp.jstl-api-3.0.0.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/jakarta.servlet.jsp.jstl-api-3.0.0.jar"/>
+    <PostResources base="C:/Users/PC/.m2/repository/jakarta/el/jakarta.el-api/5.0.0/jakarta.el-api-5.0.0.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/jakarta.el-api-5.0.0.jar"/>
+    <PostResources base="C:/Users/PC/.m2/repository/org/glassfish/web/jakarta.servlet.jsp.jstl/3.0.1/jakarta.servlet.jsp.jstl-3.0.1.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/jakarta.servlet.jsp.jstl-3.0.1.jar"/>
+    <PostResources base="C:/Users/PC/.m2/repository/org/postgresql/postgresql/42.7.4/postgresql-42.7.4.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/postgresql-42.7.4.jar"/>
+    <PostResources base="C:/Users/PC/.m2/repository/org/checkerframework/checker-qual/3.42.0/checker-qual-3.42.0.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/checker-qual-3.42.0.jar"/>
+    <PostResources base="C:/Users/PC/.m2/repository/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar" className="org.apache.catalina.webresources.FileResourceSet" webAppMount="/WEB-INF/lib/jbcrypt-0.4.jar"/>
+  </Resources>
+</Context>

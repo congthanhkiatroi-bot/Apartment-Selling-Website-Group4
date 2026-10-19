@@ -1,0 +1,287 @@
+19-Oct-2026 13:42:50.613 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/10.1.61
+19-Oct-2026 13:42:50.615 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Oct 6 2026 22:56:25 UTC
+19-Oct-2026 13:42:50.615 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 10.1.61.0
+19-Oct-2026 13:42:50.615 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Windows 11
+19-Oct-2026 13:42:50.615 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            10.0
+19-Oct-2026 13:42:50.615 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+19-Oct-2026 13:42:50.615 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             C:\Users\PC\.jdks\openjdk-26.0.2.1
+19-Oct-2026 13:42:50.616 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           26.0.2.1+1-7
+19-Oct-2026 13:42:50.616 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+19-Oct-2026 13:42:50.616 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 13:42:50.616 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 13:42:50.622 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.lang=ALL-UNNAMED
+19-Oct-2026 13:42:50.622 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.io=ALL-UNNAMED
+19-Oct-2026 13:42:50.622 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util=ALL-UNNAMED
+19-Oct-2026 13:42:50.622 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+19-Oct-2026 13:42:50.623 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED
+19-Oct-2026 13:42:50.623 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 13:42:50.623 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 13:42:50.623 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\temp
+19-Oct-2026 13:42:50.623 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\logging.properties
+19-Oct-2026 13:42:50.623 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+19-Oct-2026 13:42:50.623 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.1\lib\idea_rt.jar=56559
+19-Oct-2026 13:42:50.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dfile.encoding=UTF-8
+19-Oct-2026 13:42:50.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stdout.encoding=UTF-8
+19-Oct-2026 13:42:50.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stderr.encoding=UTF-8
+19-Oct-2026 13:42:50.628 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [2.0.16] using APR version [1.7.6].
+19-Oct-2026 13:42:50.634 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 3.5.8 25 Aug 2026]
+19-Oct-2026 13:42:50.828 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:42:50.841 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [410] milliseconds
+19-Oct-2026 13:42:50.912 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+19-Oct-2026 13:42:50.912 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/10.1.61]
+19-Oct-2026 13:42:50.921 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deploying deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml]
+19-Oct-2026 13:42:53.121 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+19-Oct-2026 13:42:53.190 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deployment of deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml] has finished in [2,267] ms
+19-Oct-2026 13:42:53.193 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:42:53.212 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [2370] milliseconds
+19-Oct-2026 13:44:06.796 INFO [Thread-1] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:44:06.807 INFO [Thread-1] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+19-Oct-2026 13:44:06.810 WARNING [Thread-1] org.apache.catalina.loader.WebappClassLoaderBase.clearReferencesJdbc The web application [apartment-web] registered the JDBC driver [org.postgresql.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+19-Oct-2026 13:44:06.812 INFO [Thread-1] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:44:06.816 INFO [Thread-1] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:45:28.053 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/10.1.61
+19-Oct-2026 13:45:28.055 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Oct 6 2026 22:56:25 UTC
+19-Oct-2026 13:45:28.055 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 10.1.61.0
+19-Oct-2026 13:45:28.055 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Windows 11
+19-Oct-2026 13:45:28.055 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            10.0
+19-Oct-2026 13:45:28.055 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+19-Oct-2026 13:45:28.056 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             C:\Users\PC\.jdks\openjdk-26.0.2.1
+19-Oct-2026 13:45:28.056 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           26.0.2.1+1-7
+19-Oct-2026 13:45:28.056 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+19-Oct-2026 13:45:28.056 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 13:45:28.056 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 13:45:28.062 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.lang=ALL-UNNAMED
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.io=ALL-UNNAMED
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util=ALL-UNNAMED
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\temp
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\logging.properties
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.1\lib\idea_rt.jar=52883
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dfile.encoding=UTF-8
+19-Oct-2026 13:45:28.063 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stdout.encoding=UTF-8
+19-Oct-2026 13:45:28.064 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stderr.encoding=UTF-8
+19-Oct-2026 13:45:28.066 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [2.0.16] using APR version [1.7.6].
+19-Oct-2026 13:45:28.072 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 3.5.8 25 Aug 2026]
+19-Oct-2026 13:45:28.282 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:45:28.294 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [397] milliseconds
+19-Oct-2026 13:45:28.341 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+19-Oct-2026 13:45:28.342 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/10.1.61]
+19-Oct-2026 13:45:28.351 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deploying deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml]
+19-Oct-2026 13:45:29.183 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+19-Oct-2026 13:45:29.258 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deployment of deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml] has finished in [904] ms
+19-Oct-2026 13:45:29.260 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:45:29.280 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [984] milliseconds
+19-Oct-2026 13:45:51.707 INFO [Thread-1] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:45:51.717 INFO [Thread-1] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+19-Oct-2026 13:45:51.720 WARNING [Thread-1] org.apache.catalina.loader.WebappClassLoaderBase.clearReferencesJdbc The web application [apartment-web] registered the JDBC driver [org.postgresql.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+19-Oct-2026 13:45:51.722 INFO [Thread-1] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:45:51.724 INFO [Thread-1] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:59:55.615 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/10.1.61
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Oct 6 2026 22:56:25 UTC
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 10.1.61.0
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Windows 11
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            10.0
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             C:\Users\PC\.jdks\openjdk-26.0.2.1
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           26.0.2.1+1-7
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 13:59:55.617 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 13:59:55.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.lang=ALL-UNNAMED
+19-Oct-2026 13:59:55.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.io=ALL-UNNAMED
+19-Oct-2026 13:59:55.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util=ALL-UNNAMED
+19-Oct-2026 13:59:55.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+19-Oct-2026 13:59:55.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED
+19-Oct-2026 13:59:55.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 13:59:55.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 13:59:55.624 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\temp
+19-Oct-2026 13:59:55.625 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\logging.properties
+19-Oct-2026 13:59:55.625 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+19-Oct-2026 13:59:55.625 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.1\lib\idea_rt.jar=58992
+19-Oct-2026 13:59:55.625 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dfile.encoding=UTF-8
+19-Oct-2026 13:59:55.625 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stdout.encoding=UTF-8
+19-Oct-2026 13:59:55.625 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stderr.encoding=UTF-8
+19-Oct-2026 13:59:55.627 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [2.0.16] using APR version [1.7.6].
+19-Oct-2026 13:59:55.633 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 3.5.8 25 Aug 2026]
+19-Oct-2026 13:59:55.783 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:59:55.791 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [311] milliseconds
+19-Oct-2026 13:59:55.823 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+19-Oct-2026 13:59:55.823 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/10.1.61]
+19-Oct-2026 13:59:55.834 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deploying deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml]
+19-Oct-2026 13:59:56.636 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+19-Oct-2026 13:59:56.705 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deployment of deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml] has finished in [869] ms
+19-Oct-2026 13:59:56.708 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 13:59:56.728 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [937] milliseconds
+19-Oct-2026 14:00:03.993 INFO [Thread-1] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:00:04.003 INFO [Thread-1] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+19-Oct-2026 14:00:04.007 WARNING [Thread-1] org.apache.catalina.loader.WebappClassLoaderBase.clearReferencesJdbc The web application [apartment-web] registered the JDBC driver [org.postgresql.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+19-Oct-2026 14:00:04.009 INFO [Thread-1] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:00:04.012 INFO [Thread-1] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:47:26.629 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/10.1.61
+19-Oct-2026 14:47:26.631 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Oct 6 2026 22:56:25 UTC
+19-Oct-2026 14:47:26.631 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 10.1.61.0
+19-Oct-2026 14:47:26.631 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Windows 11
+19-Oct-2026 14:47:26.631 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            10.0
+19-Oct-2026 14:47:26.631 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+19-Oct-2026 14:47:26.631 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             C:\Users\PC\.jdks\openjdk-26.0.2.1
+19-Oct-2026 14:47:26.631 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           26.0.2.1+1-7
+19-Oct-2026 14:47:26.631 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+19-Oct-2026 14:47:26.632 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 14:47:26.632 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 14:47:26.637 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.lang=ALL-UNNAMED
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.io=ALL-UNNAMED
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util=ALL-UNNAMED
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\temp
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\logging.properties
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.1\lib\idea_rt.jar=61090
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dfile.encoding=UTF-8
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stdout.encoding=UTF-8
+19-Oct-2026 14:47:26.638 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stderr.encoding=UTF-8
+19-Oct-2026 14:47:26.643 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [2.0.16] using APR version [1.7.6].
+19-Oct-2026 14:47:26.656 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 3.5.8 25 Aug 2026]
+19-Oct-2026 14:47:26.849 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:47:26.861 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [407] milliseconds
+19-Oct-2026 14:47:26.907 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+19-Oct-2026 14:47:26.907 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/10.1.61]
+19-Oct-2026 14:47:26.916 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deploying deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml]
+19-Oct-2026 14:47:27.831 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+19-Oct-2026 14:47:27.908 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deployment of deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml] has finished in [989] ms
+19-Oct-2026 14:47:27.911 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:47:27.932 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [1069] milliseconds
+19-Oct-2026 14:48:00.128 INFO [Thread-1] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:48:00.138 INFO [Thread-1] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+19-Oct-2026 14:48:00.141 WARNING [Thread-1] org.apache.catalina.loader.WebappClassLoaderBase.clearReferencesJdbc The web application [apartment-web] registered the JDBC driver [org.postgresql.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+19-Oct-2026 14:48:00.143 INFO [Thread-1] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:48:00.145 INFO [Thread-1] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:48:29.914 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/10.1.61
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Oct 6 2026 22:56:25 UTC
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 10.1.61.0
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Windows 11
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            10.0
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             C:\Users\PC\.jdks\openjdk-26.0.2.1
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           26.0.2.1+1-7
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+19-Oct-2026 14:48:29.917 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 14:48:29.918 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.lang=ALL-UNNAMED
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.io=ALL-UNNAMED
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util=ALL-UNNAMED
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\temp
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\logging.properties
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.1\lib\idea_rt.jar=58856
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dfile.encoding=UTF-8
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stdout.encoding=UTF-8
+19-Oct-2026 14:48:29.924 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stderr.encoding=UTF-8
+19-Oct-2026 14:48:29.926 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [2.0.16] using APR version [1.7.6].
+19-Oct-2026 14:48:29.932 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 3.5.8 25 Aug 2026]
+19-Oct-2026 14:48:30.092 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:48:30.103 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [320] milliseconds
+19-Oct-2026 14:48:30.143 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+19-Oct-2026 14:48:30.143 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/10.1.61]
+19-Oct-2026 14:48:30.154 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deploying deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml]
+19-Oct-2026 14:48:31.132 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+19-Oct-2026 14:48:31.202 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deployment of deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml] has finished in [1,046] ms
+19-Oct-2026 14:48:31.205 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:48:31.226 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [1121] milliseconds
+19-Oct-2026 14:48:42.393 INFO [Thread-1] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:48:42.405 INFO [Thread-1] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+19-Oct-2026 14:48:42.408 WARNING [Thread-1] org.apache.catalina.loader.WebappClassLoaderBase.clearReferencesJdbc The web application [apartment-web] registered the JDBC driver [org.postgresql.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+19-Oct-2026 14:48:42.410 INFO [Thread-1] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:48:42.412 INFO [Thread-1] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:51:07.361 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/10.1.61
+19-Oct-2026 14:51:07.363 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Oct 6 2026 22:56:25 UTC
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 10.1.61.0
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Windows 11
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            10.0
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             C:\Users\PC\.jdks\openjdk-26.0.2.1
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           26.0.2.1+1-7
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 14:51:07.364 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.lang=ALL-UNNAMED
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.io=ALL-UNNAMED
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util=ALL-UNNAMED
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\temp
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\logging.properties
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.1\lib\idea_rt.jar=53831
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dfile.encoding=UTF-8
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stdout.encoding=UTF-8
+19-Oct-2026 14:51:07.370 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stderr.encoding=UTF-8
+19-Oct-2026 14:51:07.372 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [2.0.16] using APR version [1.7.6].
+19-Oct-2026 14:51:07.377 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 3.5.8 25 Aug 2026]
+19-Oct-2026 14:51:07.546 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:51:07.556 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [321] milliseconds
+19-Oct-2026 14:51:07.594 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+19-Oct-2026 14:51:07.594 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/10.1.61]
+19-Oct-2026 14:51:07.603 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deploying deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml]
+19-Oct-2026 14:51:08.397 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+19-Oct-2026 14:51:08.461 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deployment of deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml] has finished in [856] ms
+19-Oct-2026 14:51:08.464 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:51:08.484 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [926] milliseconds
+19-Oct-2026 14:51:30.997 INFO [Thread-1] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:51:31.008 INFO [Thread-1] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+19-Oct-2026 14:51:31.012 WARNING [Thread-1] org.apache.catalina.loader.WebappClassLoaderBase.clearReferencesJdbc The web application [apartment-web] registered the JDBC driver [org.postgresql.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+19-Oct-2026 14:51:31.015 INFO [Thread-1] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:51:31.017 INFO [Thread-1] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:54:51.269 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version name:   Apache Tomcat/10.1.61
+19-Oct-2026 14:54:51.271 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server built:          Oct 6 2026 22:56:25 UTC
+19-Oct-2026 14:54:51.271 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Server version number: 10.1.61.0
+19-Oct-2026 14:54:51.271 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Name:               Windows 11
+19-Oct-2026 14:54:51.271 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log OS Version:            10.0
+19-Oct-2026 14:54:51.272 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Architecture:          amd64
+19-Oct-2026 14:54:51.272 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Java Home:             C:\Users\PC\.jdks\openjdk-26.0.2.1
+19-Oct-2026 14:54:51.272 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Version:           26.0.2.1+1-7
+19-Oct-2026 14:54:51.272 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log JVM Vendor:            Oracle Corporation
+19-Oct-2026 14:54:51.272 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_BASE:         C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 14:54:51.272 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log CATALINA_HOME:         C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 14:54:51.277 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.lang=ALL-UNNAMED
+19-Oct-2026 14:54:51.278 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.io=ALL-UNNAMED
+19-Oct-2026 14:54:51.278 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util=ALL-UNNAMED
+19-Oct-2026 14:54:51.278 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.base/java.util.concurrent=ALL-UNNAMED
+19-Oct-2026 14:54:51.278 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED
+19-Oct-2026 14:54:51.278 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.home=C:\Users\PC\Downloads\apache-tomcat-10.1.61-windows-x64\apache-tomcat-10.1.61
+19-Oct-2026 14:54:51.278 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dcatalina.base=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15
+19-Oct-2026 14:54:51.278 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.io.tmpdir=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\temp
+19-Oct-2026 14:54:51.278 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.config.file=C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\logging.properties
+19-Oct-2026 14:54:51.279 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager
+19-Oct-2026 14:54:51.279 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -javaagent:C:\Program Files\JetBrains\IntelliJ IDEA 2026.2.1\lib\idea_rt.jar=60605
+19-Oct-2026 14:54:51.279 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dfile.encoding=UTF-8
+19-Oct-2026 14:54:51.279 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stdout.encoding=UTF-8
+19-Oct-2026 14:54:51.279 INFO [main] org.apache.catalina.startup.VersionLoggerListener.log Command line argument: -Dsun.stderr.encoding=UTF-8
+19-Oct-2026 14:54:51.282 INFO [main] org.apache.catalina.core.AprLifecycleListener.lifecycleEvent Loaded Apache Tomcat Native library [2.0.16] using APR version [1.7.6].
+19-Oct-2026 14:54:51.288 INFO [main] org.apache.catalina.core.AprLifecycleListener.initializeSSL OpenSSL successfully initialized [OpenSSL 3.5.8 25 Aug 2026]
+19-Oct-2026 14:54:51.485 INFO [main] org.apache.coyote.AbstractProtocol.init Initializing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:54:51.497 INFO [main] org.apache.catalina.startup.Catalina.load Server initialization in [380] milliseconds
+19-Oct-2026 14:54:51.540 INFO [main] org.apache.catalina.core.StandardService.startInternal Starting service [Catalina]
+19-Oct-2026 14:54:51.540 INFO [main] org.apache.catalina.core.StandardEngine.startInternal Starting Servlet engine: [Apache Tomcat/10.1.61]
+19-Oct-2026 14:54:51.549 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deploying deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml]
+19-Oct-2026 14:54:52.611 INFO [main] org.apache.jasper.servlet.TldScanner.scanJars At least one JAR was scanned for TLDs yet contained no TLDs. Enable debug logging for this logger for a complete list of JARs that were scanned but no TLDs were found in them. Skipping unneeded JARs during scanning can improve startup time and JSP compilation time.
+19-Oct-2026 14:54:52.692 INFO [main] org.apache.catalina.startup.HostConfig.deployDescriptor Deployment of deployment descriptor [C:\Users\PC\Downloads\Apartment-Selling-Website-Group4-tp-2026-10-15\Apartment-Selling-Website-Group4-tp-2026-10-15\conf\Catalina\localhost\apartment-web.xml] has finished in [1,140] ms
+19-Oct-2026 14:54:52.694 INFO [main] org.apache.coyote.AbstractProtocol.start Starting ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:54:52.715 INFO [main] org.apache.catalina.startup.Catalina.start Server startup in [1218] milliseconds
+19-Oct-2026 14:55:53.918 INFO [Thread-1] org.apache.coyote.AbstractProtocol.pause Pausing ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:55:53.932 INFO [Thread-1] org.apache.catalina.core.StandardService.stopInternal Stopping service [Catalina]
+19-Oct-2026 14:55:53.938 WARNING [Thread-1] org.apache.catalina.loader.WebappClassLoaderBase.clearReferencesJdbc The web application [apartment-web] registered the JDBC driver [org.postgresql.Driver] but failed to unregister it when the web application was stopped. To prevent a memory leak, the JDBC Driver has been forcibly unregistered.
+19-Oct-2026 14:55:53.943 INFO [Thread-1] org.apache.coyote.AbstractProtocol.stop Stopping ProtocolHandler ["http-nio-8080"]
+19-Oct-2026 14:55:53.957 INFO [Thread-1] org.apache.coyote.AbstractProtocol.destroy Destroying ProtocolHandler ["http-nio-8080"]
